@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SmartDoorbellFragment">
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:alpha="1"
+        app:backgroundTint="@color/primary_color"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_dots_menu"
+        app:tint="@color/white"
+        tools:ignore="RelativeOverlap,VectorDrawableCompat"
+        android:contentDescription="@string/fab_menu_description" />
+
+    <TextView
+        android:id="@+id/textSelectPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/recyclerViewPhotos"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="6dp"
+        android:alpha="0"
+        android:gravity="center_horizontal|top"
+        android:maxLines="1"
+        android:paddingTop="4dp"
+        android:text="@string/text_select_photo"
+        android:textColor="@color/primary_color"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="100dp"
+        app:autoSizeMinTextSize="10dp"
+        app:autoSizeStepGranularity="0.5dp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="3.0f"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fabMenu"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="16dp"
+        android:scrollbarThumbVertical="@drawable/scrollbar_style"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/layoutNoPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:alpha="1">
+
+        <ImageView
+            android:id="@+id/imageNoPhotos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/text_no_photos"
+            app:srcCompat="@drawable/ic_no_photos" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imageNoPhotos"
+            android:layout_marginStart="78dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="78dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_horizontal|top"
+                android:maxLines="2"
+                android:text="@string/text_no_photos"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="3.0f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

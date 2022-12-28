@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".DevicesFragment">
+
+    <FrameLayout
+        android:id="@+id/frameLayoutDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/radioGroupHeatingOrBoiler"
+        android:layout_alignParentTop="true"
+        android:alpha="0"
+        android:visibility="gone">
+
+    </FrameLayout>
+
+    <RadioGroup
+        android:id="@+id/radioGroupHeatingOrBoiler"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_above="@+id/fabBack"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:background="@drawable/heating_or_boiler_background"
+        android:checkedButton="@+id/offer"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/buttonHeating"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/heating_or_boiler_toggle"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:paddingBottom="2.5dp"
+            android:text="@string/button_heating"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:autoSizeMaxTextSize="100dp"
+            app:autoSizeMinTextSize="10dp"
+            app:autoSizeStepGranularity="0.5dp"
+            app:autoSizeTextType="uniform"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <RadioButton
+            android:id="@+id/buttonBoiler"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/heating_or_boiler_toggle"
+            android:button="@null"
+            android:checked="false"
+            android:gravity="center"
+            android:paddingBottom="2.5dp"
+            android:text="@string/button_boiler"
+            android:textColor="@color/secondary_color"
+            android:textStyle="bold"
+            app:autoSizeMaxTextSize="100dp"
+            app:autoSizeMinTextSize="10dp"
+            app:autoSizeStepGranularity="0.5dp"
+            app:autoSizeTextType="uniform"
+            tools:ignore="TouchTargetSizeCheck" />
+    </RadioGroup>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutHeater"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="35dp"
+        android:alpha="0"
+        android:backgroundTint="@android:color/transparent"
+        android:visibility="gone"
+        app:tabMode="fixed"
+        tools:ignore="SpeakableTextPresentCheck">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_item_temperature_mode" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_item_time_mode" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerHeater"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fabBack"
+        android:layout_below="@+id/tabLayoutHeater"
+        android:alpha="0"
+        android:visibility="gone">
+
+    </androidx.viewpager2.widget.ViewPager2>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAllDevices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginEnd="17dp"
+        android:alpha="0"
+        android:visibility="gone">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAddedDevices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginEnd="17dp"
+        android:alpha="0"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/layoutLogo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:alpha="0">
+
+        <ImageView
+            android:id="@+id/imageLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/image_logo_description"
+            app:srcCompat="@drawable/ic_smart_home" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imageLogo"
+            android:layout_marginStart="78dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="78dp">
+
+            <TextView
+                android:id="@+id/textAddDevice"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_horizontal|top"
+                android:maxLines="1"
+                android:text="@string/text_add_device"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="7.4f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/buttonAddDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:background="@drawable/button_rounded_background"
+        android:maxLines="1"
+        android:text="@string/button_add_device"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="100dp"
+        app:autoSizeMinTextSize="10dp"
+        app:autoSizeStepGranularity="0.5dp"
+        app:autoSizeTextType="uniform"
+        app:backgroundTint="#FFFFFF"
+        app:backgroundTintMode="multiply"
+        app:icon="@drawable/ic_add"
+        app:iconPadding="2dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="35dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_color"
+        app:fabSize="normal"
+        app:maxImageSize="32dp"
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@color/white"
+        tools:ignore="VectorDrawableCompat,SpeakableTextPresentCheck"
+        android:contentDescription="@string/button_add_device" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:visibility="gone"
+        android:contentDescription="@string/fab_back_description"
+        app:backgroundTint="@color/primary_color"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_back"
+        app:tint="@color/white"
+        tools:ignore="VectorDrawableCompat,SpeakableTextPresentCheck" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabDeviceSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_color"
+        app:fabSize="normal"
+        app:maxImageSize="30dp"
+        app:srcCompat="@drawable/ic_settings"
+        app:tint="@color/white"
+        tools:ignore="VectorDrawableCompat,SpeakableTextPresentCheck"
+        android:contentDescription="@string/fab_device_settings_description" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabDeleteDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="35dp"
+        android:layout_marginBottom="16dp"
+        android:alpha="0"
+        android:visibility="gone"
+        android:contentDescription="@string/button_delete_user"
+        app:backgroundTint="@color/primary_color"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_delete"
+        app:tint="@color/white"
+        tools:ignore="VectorDrawableCompat,SpeakableTextPresentCheck" />
+
+</RelativeLayout>

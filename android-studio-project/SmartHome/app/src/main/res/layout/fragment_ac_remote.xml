@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutConfigureACRemote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:alpha="0"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="100dp"
+            android:layout_marginEnd="100dp"
+            android:contentDescription="@string/text_smart_ir_remote"
+            android:src="@drawable/ic_smart_remote"
+            app:layout_constraintBottom_toTopOf="@+id/textConfigureACRemote"
+            app:layout_constraintDimensionRatio="1.0f"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/primary_color" />
+
+        <TextView
+            android:id="@+id/textConfigureACRemote"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/click_any_button_text"
+            android:textColor="@color/primary_color"
+            android:textStyle="bold"
+            app:autoSizeMaxTextSize="100sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity="0.5sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="4.6f"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:scrollbarThumbVertical="@drawable/scrollbar_style"
+        tools:context=".ACRemoteFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="26dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginEnd="26dp"
+                android:alpha="0"
+                android:scrollbarThumbHorizontal="@drawable/scrollbar_style"
+                android:scrollbars="horizontal"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/layoutTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="-13dp"
+                android:alpha="0"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="1">
+
+                <Button
+                    android:id="@+id/buttonAddTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginEnd="13dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/button_add_time"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    app:icon="@drawable/ic_add_time"
+                    app:iconPadding="6dp"
+                    tools:ignore="ButtonStyle" />
+
+                <Button
+                    android:id="@+id/buttonDeleteTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="35dp"
+                    android:layout_marginBottom="13dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/button_delete_user"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    app:icon="@drawable/ic_delete_time"
+                    app:iconPadding="3dp"
+                    tools:ignore="ButtonStyle" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonStartTimeMode"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:alpha="0"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:paddingEnd="20dp"
+                android:text="@string/button_start_mode"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_time_mode"
+                app:iconPadding="4dp"
+                tools:ignore="ButtonStyle,RtlSymmetry" />
+
+            <Button
+                android:id="@+id/buttonStopTimeMode"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:alpha="0"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:paddingEnd="20dp"
+                android:text="@string/button_stop_mode"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_time_mode"
+                app:iconPadding="6dp"
+                tools:ignore="ButtonStyle,RtlSymmetry" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutTemperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="19dp">
+
+                <ImageButton
+                    android:id="@+id/buttonDecreaseTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_decrease_temperature_description"
+                    android:paddingEnd="0dp"
+                    android:src="@drawable/ic_decrease_volume"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/textTemperature"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/primary_color"
+                    tools:ignore="RtlSymmetry,DuplicateSpeakableTextCheck" />
+
+                <TextView
+                    android:id="@+id/textTemperature"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="105dp"
+                    android:layout_marginEnd="105dp"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:maxLines="1"
+                    android:textColor="@color/primary_color"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100dp"
+                    app:autoSizeMinTextSize="10dp"
+                    app:autoSizeStepGranularity="0.5dp"
+                    app:autoSizeTextType="uniform"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.0f"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/buttonIncreaseTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_increase_temperature_description"
+                    android:paddingStart="0dp"
+                    android:src="@drawable/ic_increase_volume"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toEndOf="@+id/textTemperature"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/primary_color"
+                    tools:ignore="RtlSymmetry" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutModeFanSpeed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginEnd="35dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/imageACMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="55dp"
+                        android:layout_marginEnd="55dp"
+                        android:contentDescription="@string/image_ac_mode_description"
+                        android:src="@drawable/ic_cold_mode"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1.0f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0"
+                        app:tint="@color/primary_color" />
+
+                    <TextView
+                        android:id="@+id/textACMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="30dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/cold_mode_text"
+                        android:textAlignment="gravity"
+                        android:textColor="@color/primary_color"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100dp"
+                        app:autoSizeMinTextSize="10dp"
+                        app:autoSizeStepGranularity="0.5dp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="2.1f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/imageACMode" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5">
+
+                    <ImageView
+                        android:id="@+id/imageFanSpeed"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="55dp"
+                        android:layout_marginEnd="55dp"
+                        android:contentDescription="@string/button_fan_speed"
+                        android:src="@drawable/ic_min_fan_speed"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1.0f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.0" />
+
+                    <TextView
+                        android:id="@+id/textFanSpeed"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="30dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/min_fan_speed_text"
+                        android:textAlignment="gravity"
+                        android:textColor="@color/primary_color"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100dp"
+                        app:autoSizeMinTextSize="10dp"
+                        app:autoSizeStepGranularity="0.5dp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="2.1f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/imageFanSpeed" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutModeFanSpeedButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <Button
+                    android:id="@+id/buttonACMode"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginEnd="7.5dp"
+                    android:layout_marginBottom="13dp"
+                    android:layout_weight="0.4"
+                    android:alpha="1"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/button_ac_mode"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    tools:ignore="ButtonStyle,RtlSymmetry" />
+
+                <Button
+                    android:id="@+id/buttonFanSpeed"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="7.5dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginEnd="35dp"
+                    android:layout_marginBottom="13dp"
+                    android:layout_weight="0.6"
+                    android:alpha="1"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/button_fan_speed"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    app:icon="@drawable/ic_fan"
+                    app:iconPadding="5dp"
+                    tools:ignore="ButtonStyle,RtlSymmetry,DuplicateSpeakableTextCheck" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTurboLight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <Button
+                    android:id="@+id/buttonTurbo"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginEnd="7.5dp"
+                    android:layout_marginBottom="13dp"
+                    android:layout_weight="0.5"
+                    android:alpha="1"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/turbo_off_text"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    tools:ignore="ButtonStyle,RtlSymmetry" />
+
+                <Button
+                    android:id="@+id/buttonLight"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="7.5dp"
+                    android:layout_marginEnd="35dp"
+                    android:layout_marginBottom="13dp"
+                    android:layout_weight="0.5"
+                    android:alpha="1"
+                    android:background="@drawable/button_rounded_background"
+                    android:maxLines="1"
+                    android:text="@string/light_off_text"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    app:backgroundTint="#FFFFFF"
+                    app:backgroundTintMode="multiply"
+                    tools:ignore="ButtonStyle,RtlSymmetry" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonTimeMode"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="35dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:alpha="1"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:text="@string/button_time_mode"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_time_mode"
+                app:iconPadding="4dp"
+                tools:ignore="ButtonStyle,RtlSymmetry" />
+
+            <Button
+                android:id="@+id/buttonStartAC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="16dp"
+                android:alpha="1"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:text="@string/button_start_ac"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_on_off"
+                app:iconPadding="4dp"
+                tools:ignore="ButtonStyle,RtlSymmetry" />
+
+            <Button
+                android:id="@+id/buttonStopAC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="16dp"
+                android:alpha="0"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:text="@string/button_stop_ac"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_on_off"
+                app:iconPadding="4dp"
+                tools:ignore="ButtonStyle,RtlSymmetry" />
+
+        </LinearLayout>
+
+    </ScrollView>
+</RelativeLayout>

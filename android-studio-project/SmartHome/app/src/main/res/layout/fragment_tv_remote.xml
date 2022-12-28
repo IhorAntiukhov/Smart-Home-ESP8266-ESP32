@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbarThumbVertical="@drawable/scrollbar_style"
+    tools:context=".TvRemoteFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutSelectButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="56dp"
+            android:layout_marginBottom="-36dp"
+            android:alpha="0"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_horizontal|top"
+                android:maxLines="1"
+                android:text="@string/text_select_button"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="6.2f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp">
+
+            <ImageButton
+                android:id="@+id/buttonOnOff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_tv_on_off_description"
+                android:padding="10dp"
+                android:src="@drawable/ic_light_on_off" />
+
+            <TextView
+                android:id="@+id/textTvState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/buttonOnOff"
+                android:layout_alignBottom="@+id/buttonOnOff"
+                android:layout_marginStart="13dp"
+                android:layout_marginEnd="13dp"
+                android:layout_toStartOf="@+id/buttonSource"
+                android:layout_toEndOf="@+id/buttonOnOff"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/off_text"
+                android:textAlignment="center"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform" />
+
+            <ImageButton
+                android:id="@+id/buttonSource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="35dp"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_source_description"
+                android:padding="10dp"
+                android:src="@drawable/ic_tv_source" />
+
+        </RelativeLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="90dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="90dp">
+
+            <ImageView
+                android:id="@+id/imageFirstCircleRemote"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@drawable/first_remote_circle_background"
+                android:src="@drawable/first_remote_circle_background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1.0f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@+id/imageFirstCircleRemote"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageFirstCircleRemote">
+
+                <ImageButton
+                    android:id="@+id/buttonUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_up_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_tv_up" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.1"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <ImageButton
+                        android:id="@+id/buttonLeft"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.95"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_left_description"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_tv_left"
+                        tools:ignore="NestedWeights" />
+
+                    <TextView
+                        android:id="@+id/textOk"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.1"
+                        android:background="@drawable/remote_button_background"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:padding="17dp"
+                        android:paddingEnd="20dp"
+                        android:text="OK"
+                        android:textAlignment="center"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        tools:ignore="HardcodedText,RtlSymmetry" />
+
+                    <ImageButton
+                        android:id="@+id/buttonRight"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="-2dp"
+                        android:layout_weight="0.95"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_right_description"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_tv_right" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/buttonDown"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_down_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_tv_down" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:id="@+id/layoutVolume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:background="@drawable/volume_layout_background"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/buttonIncreaseVolume"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_increase_volume_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_increase_volume" />
+
+                <TextView
+                    android:id="@+id/textVolume"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:padding="5dp"
+                    android:text="V"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    tools:ignore="HardcodedText,RtlSymmetry" />
+
+                <ImageButton
+                    android:id="@+id/buttonDecreaseVolume"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_decrease_volume_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_decrease_volume" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/buttonMute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_mute_description"
+                android:padding="14dp"
+                android:src="@drawable/ic_mute" />
+
+            <ImageButton
+                android:id="@+id/buttonMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonMute"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/fab_menu_description"
+                android:padding="15dp"
+                android:src="@drawable/ic_menu" />
+
+            <LinearLayout
+                android:id="@+id/layoutChannel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="35dp"
+                android:background="@drawable/volume_layout_background"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/buttonNextChannel"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_next_channel_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_next_channel" />
+
+                <TextView
+                    android:id="@+id/textChannel"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:padding="5dp"
+                    android:text="C"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="100sp"
+                    app:autoSizeMinTextSize="10sp"
+                    app:autoSizeStepGranularity="0.5sp"
+                    app:autoSizeTextType="uniform"
+                    tools:ignore="HardcodedText,RtlSymmetry" />
+
+                <ImageButton
+                    android:id="@+id/buttonPreviousChannel"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_previous_channel_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_previous_channel" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/buttonSaveRemote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="35dp"
+            android:layout_marginBottom="16dp"
+            android:alpha="0"
+            android:background="@drawable/button_rounded_background"
+            android:maxLines="1"
+            android:text="@string/button_save_remote"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:autoSizeMaxTextSize="100dp"
+            app:autoSizeMinTextSize="10dp"
+            app:autoSizeStepGranularity="0.5dp"
+            app:autoSizeTextType="uniform"
+            app:backgroundTint="#FFFFFF"
+            app:backgroundTintMode="multiply"
+            app:icon="@drawable/ic_save_remote"
+            app:iconPadding="2dp" />
+
+    </LinearLayout>
+
+</ScrollView>

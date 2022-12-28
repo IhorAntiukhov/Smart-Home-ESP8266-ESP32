@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbarThumbVertical="@drawable/scrollbar_style"
+    tools:context=".LightRemoteFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutSelectButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="56dp"
+            android:layout_marginBottom="-36dp"
+            android:alpha="0"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_horizontal|top"
+                android:maxLines="1"
+                android:text="@string/text_select_button"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="6.2f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp">
+
+            <ImageButton
+                android:id="@+id/buttonOnOff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_on_off_light_description"
+                android:padding="10dp"
+                android:src="@drawable/ic_light_on_off" />
+
+            <TextView
+                android:id="@+id/textLightState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/buttonOnOff"
+                android:layout_alignBottom="@+id/buttonOnOff"
+                android:layout_marginStart="13dp"
+                android:layout_marginEnd="13dp"
+                android:layout_toStartOf="@+id/buttonNightMode"
+                android:layout_toEndOf="@+id/buttonOnOff"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/off_text"
+                android:textAlignment="center"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100sp"
+                app:autoSizeMinTextSize="10sp"
+                app:autoSizeStepGranularity="0.5sp"
+                app:autoSizeTextType="uniform" />
+
+            <ImageButton
+                android:id="@+id/buttonNightMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="35dp"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_night_mode_description"
+                android:padding="14dp"
+                android:src="@drawable/ic_night_mode"
+                tools:ignore="DuplicateSpeakableTextCheck" />
+
+        </RelativeLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutBrightness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="90dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="90dp">
+
+            <ImageView
+                android:id="@+id/imageFirstCircleRemote"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@drawable/first_remote_circle_background"
+                android:src="@drawable/first_remote_circle_background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1.0f"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@+id/imageFirstCircleRemote"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageFirstCircleRemote">
+
+                <ImageButton
+                    android:id="@+id/buttonIncreaseBrightness"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_increase_brightness_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_increase_brightness" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.1"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <ImageButton
+                        android:id="@+id/buttonDecreaseColorTemperature"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.95"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_decrease_color_temperature_description"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_decrease_color_temperature"
+                        tools:ignore="NestedWeights" />
+
+                    <ImageButton
+                        android:id="@+id/buttonMaxBrightness"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.1"
+                        android:background="@drawable/remote_button_background"
+                        android:contentDescription="@string/button_max_brightness_description"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_max_brightness" />
+
+                    <ImageButton
+                        android:id="@+id/buttonIncreaseColorTemperature"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.95"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_increase_color_temperature_description"
+                        android:padding="12dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_increase_color_temperature" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/buttonDecreaseBrightness"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.95"
+                    android:backgroundTint="#00FFFFFF"
+                    android:contentDescription="@string/button_decrease_brightness_description"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_decrease_brightness" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/buttonTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_timer_description"
+                android:padding="10dp"
+                android:src="@drawable/ic_light_timer" />
+
+            <ImageButton
+                android:id="@+id/buttonHalfBrightness"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonTimer"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_toStartOf="@+id/buttonTimer"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_half_brightness"
+                android:padding="12dp"
+                android:src="@drawable/ic_half_brightness" />
+
+            <ImageButton
+                android:id="@+id/buttonColorTemperatureMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonTimer"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_toEndOf="@+id/buttonTimer"
+                android:background="@drawable/remote_button_background"
+                android:contentDescription="@string/button_color_temperature_mode_description"
+                android:padding="12dp"
+                android:src="@drawable/ic_color_temperature_mode" />
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/buttonSaveRemote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="35dp"
+            android:layout_marginBottom="16dp"
+            android:alpha="0"
+            android:background="@drawable/button_rounded_background"
+            android:maxLines="1"
+            android:text="@string/button_save_remote"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:autoSizeMaxTextSize="100dp"
+            app:autoSizeMinTextSize="10dp"
+            app:autoSizeStepGranularity="0.5dp"
+            app:autoSizeTextType="uniform"
+            app:backgroundTint="#FFFFFF"
+            app:backgroundTintMode="multiply"
+            app:icon="@drawable/ic_save_remote"
+            app:iconPadding="2dp" />
+
+    </LinearLayout>
+
+</ScrollView>

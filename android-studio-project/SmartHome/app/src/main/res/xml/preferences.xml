@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/text_wifi_thermometer"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+        <Preference
+            android:key="buttonClearWiFiThermometerGraph"
+            android:title="@string/preference_clear_graph_data"
+            />
+
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="WiFiThermometerGraphInterval"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_thermometer_interval_title"
+            android:summary="@string/preference_thermometer_interval_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="ShowBatteryLevelInNotification"
+            android:title="@string/preference_show_battery_level"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/text_heating_and_boiler"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+
+        <EditTextPreference
+            android:defaultValue="2"
+            android:key="MaxHeatingElements"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_heating_elements_title"
+            android:summary="@string/preference_max_heating_elements_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <EditTextPreference
+            android:defaultValue="2"
+            android:key="HeatingDecreaseInMinTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_min_temperature_title"
+            android:summary="@string/preference_min_temperature_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="HeatingIncreaseInMaxTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_temperature_title"
+            android:summary="@string/preference_max_temperature_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="isOverCurrentProtectionEnabled"
+            android:title="@string/preference_over_current_protection_title"
+            android:summary="@string/preference_over_current_protection_summary"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/text_smart_ir_remote"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+        <EditTextPreference
+            android:defaultValue="16"
+            android:key="MinTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_min_temperature_title"
+            android:summary="@string/preference_min_ac_temperature_title"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <EditTextPreference
+            android:defaultValue="30"
+            android:key="MaxTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_temperature_title"
+            android:summary="@string/preference_max_ac_temperature_title"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/text_smart_doorbell"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+        <EditTextPreference
+            android:defaultValue="5"
+            android:key="MaxPhotos"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_photos_title"
+            android:summary="@string/preference_max_photos_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <Preference
+            android:key="buttonSelectPhotosDirectory"
+            android:title="@string/preference_select_photos_directory"
+             />
+
+        <Preference
+            android:key="buttonDeleteAllPhotos"
+            android:title="@string/preference_delete_all_photos"
+             />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/text_meter_reader"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+        <EditTextPreference
+            android:defaultValue="2"
+            android:key="MeterDigitsAfterPoint"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_meter_digits_after_point_title"
+            android:summary="@string/preference_meter_digits_after_point_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+             />
+
+        <EditTextPreference
+            android:defaultValue="7"
+            android:key="MaxStorageTimeOfMeterReadings"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_storage_time_title"
+            android:summary="@string/preference_max_storage_time_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+             />
+
+        <Preference
+            android:key="buttonClearMeterReaderGraph"
+            android:title="@string/preference_clear_graph_data"
+             />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/text_smart_heater"
+        android:layout="@layout/preference_category_title"
+        app:allowDividerBelow="true">
+        <EditTextPreference
+            android:defaultValue="2"
+            android:key="HeaterDecreaseInMinTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_min_temperature_title"
+            android:summary="@string/preference_min_temperature_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="HeaterIncreaseInMaxTemperature"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/preference_max_temperature_title"
+            android:summary="@string/preference_max_temperature_summary"
+            app:dialogLayout="@layout/edit_text_preference"
+            />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="isHeaterNotificationsEnabled"
+            android:title="@string/preference_heater_notifications_title"
+            android:summary="@string/preference_heater_notifications_summary"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/preference_category_other_settings"
+        android:layout="@layout/preference_category_title">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/vibrationNames"
+            android:entryValues="@array/vibrationTypes"
+            android:key="isHapticFeedbackEnabled"
+            android:title="@string/preference_haptic_feedback"
+            />
+
+        <Preference
+            android:key="buttonDefaultSettings"
+            android:title="@string/preference_default_settings"
+             />
+    </PreferenceCategory>
+</PreferenceScreen>

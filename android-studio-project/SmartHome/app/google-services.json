@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "682225128501",
+    "firebase_url": "https://smarthouseesp-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "smarthouseesp",
+    "storage_bucket": "smarthouseesp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682225128501:android:4e7d56d990d2a45a59cd7c",
+        "android_client_info": {
+          "package_name": "com.arduinoworld.smarthome"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682225128501-j5bn4mh0m3csqqv03scp1qt4glgearqe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZ9eh6c1NjjY0KegAq7lmQwM8KMQ1R0Ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682225128501-j5bn4mh0m3csqqv03scp1qt4glgearqe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

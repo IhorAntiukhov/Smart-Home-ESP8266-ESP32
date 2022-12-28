@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SmartRemotesFragment">
+
+    <FrameLayout
+        android:id="@+id/frameLayoutRemote"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:id="@+id/scrollViewRemotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="16dp"
+        android:scrollbarThumbVertical="@drawable/scrollbar_style">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewLightRemote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginRight="35dp"
+                android:backgroundTint="@color/primary_color"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imageLightRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:contentDescription="@string/text_light_remote"
+                        android:src="@drawable/ic_light_remote" />
+
+                    <TextView
+                        android:id="@+id/textLightRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@+id/imageLightState"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginEnd="13dp"
+                        android:layout_toEndOf="@id/imageLightRemote"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_light_remote"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textLightState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/imageLightState"
+                        android:layout_alignBottom="@+id/imageLightState"
+                        android:layout_marginStart="13dp"
+                        android:layout_toStartOf="@id/buttonLightOnOff"
+                        android:layout_toEndOf="@+id/imageLightState"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="@string/off_text"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageLightState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/imageLightRemote"
+                        android:layout_marginStart="13dp"
+                        android:layout_toEndOf="@+id/imageLightRemote"
+                        android:contentDescription="@string/text_light_remote"
+                        android:src="@drawable/ic_light_off" />
+
+                    <ImageButton
+                        android:id="@+id/buttonLightOnOff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textLightRemote"
+                        android:layout_alignEnd="@id/textLightRemote"
+                        android:layout_alignBottom="@+id/textLightState"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_on_off_light_description"
+                        android:src="@drawable/ic_on_off"
+                        tools:ignore="TouchTargetSizeCheck" />
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewTvRemote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="35dp"
+                android:backgroundTint="@color/primary_color"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imageTvRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:contentDescription="@string/text_tv_remote"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_tv_remote" />
+
+                    <TextView
+                        android:id="@+id/textTvRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@+id/imageTvState"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginEnd="13dp"
+                        android:layout_toEndOf="@id/imageTvRemote"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_tv_remote"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textTvState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/imageTvState"
+                        android:layout_alignBottom="@+id/imageTvState"
+                        android:layout_marginStart="13dp"
+                        android:layout_toStartOf="@id/buttonTvOnOff"
+                        android:layout_toEndOf="@+id/imageTvState"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="@string/off_text"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageTvState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/imageTvRemote"
+                        android:layout_marginStart="13dp"
+                        android:layout_toEndOf="@+id/imageTvRemote"
+                        android:contentDescription="@string/text_tv_remote"
+                        android:src="@drawable/ic_tv_off" />
+
+                    <ImageButton
+                        android:id="@+id/buttonTvOnOff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textTvRemote"
+                        android:layout_alignEnd="@id/textTvRemote"
+                        android:layout_alignBottom="@+id/textTvState"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_tv_on_off_description"
+                        android:src="@drawable/ic_on_off"
+                        tools:ignore="TouchTargetSizeCheck" />
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewACRemote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="35dp"
+                android:backgroundTint="@color/primary_color"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imageACRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:contentDescription="@string/text_ac_remote"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_ac" />
+
+                    <TextView
+                        android:id="@+id/textACRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@+id/imageACState"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginEnd="13dp"
+                        android:layout_toEndOf="@id/imageACRemote"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_ac_remote"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textACState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/imageACState"
+                        android:layout_alignBottom="@+id/imageACState"
+                        android:layout_marginStart="13dp"
+                        android:layout_toStartOf="@id/buttonACOnOff"
+                        android:layout_toEndOf="@+id/imageACState"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="@string/off_text"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageACState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/imageACRemote"
+                        android:layout_marginStart="13dp"
+                        android:layout_toEndOf="@+id/imageACRemote"
+                        android:contentDescription="@string/text_ac_remote"
+                        android:src="@drawable/ic_ac_off" />
+
+                    <ImageButton
+                        android:id="@+id/buttonACOnOff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textACRemote"
+                        android:layout_alignEnd="@id/textACRemote"
+                        android:layout_alignBottom="@+id/textACState"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_ac_on_off_description"
+                        android:src="@drawable/ic_on_off"
+                        tools:ignore="TouchTargetSizeCheck" />
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewRGBRemote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="35dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/primary_color"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imageRGBRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:contentDescription="@string/text_rgb_remote"
+                        android:padding="3dp"
+                        android:src="@drawable/ic_rgb_controller" />
+
+                    <TextView
+                        android:id="@+id/textRGBRemote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@+id/imageRGBState"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="13dp"
+                        android:layout_marginEnd="13dp"
+                        android:layout_toEndOf="@id/imageRGBRemote"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_rgb_remote"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textRGBState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/imageRGBState"
+                        android:layout_alignBottom="@+id/imageRGBState"
+                        android:layout_marginStart="13dp"
+                        android:layout_toStartOf="@id/buttonRGBOnOff"
+                        android:layout_toEndOf="@+id/imageRGBState"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="@string/off_text"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="10sp"
+                        app:autoSizeStepGranularity="0.5sp"
+                        app:autoSizeTextType="uniform"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="5.3f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageRGBState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/imageRGBRemote"
+                        android:layout_marginStart="13dp"
+                        android:layout_toEndOf="@+id/imageRGBRemote"
+                        android:contentDescription="@string/text_rgb_remote"
+                        android:src="@drawable/ic_light_off" />
+
+                    <ImageButton
+                        android:id="@+id/buttonRGBOnOff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textRGBRemote"
+                        android:layout_alignEnd="@id/textRGBRemote"
+                        android:layout_alignBottom="@+id/textRGBState"
+                        android:backgroundTint="#00FFFFFF"
+                        android:contentDescription="@string/button_rgb_on_off_description"
+                        android:src="@drawable/ic_on_off"
+                        tools:ignore="TouchTargetSizeCheck" />
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
