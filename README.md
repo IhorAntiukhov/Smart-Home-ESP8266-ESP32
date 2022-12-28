@@ -2,7 +2,7 @@
 
 For this project, I used my devices made earlier *(I published repositories with old versions of devices on my github)*, added new features to them and fixed some bugs. I have developed *an Android app* with which you can control each device. **A video with a more detailed description of this project is below.**
 
-[![Video about my project on YouTube]()]()
+[![Video about my project on YouTube](https://img.youtube.com/vi/ObBi3VIdf44/0.jpg)](https://youtu.be/ObBi3VIdf44)
 
 ## WiFi Thermometer
 
