@@ -73,11 +73,11 @@ class HeaterTemperatureFragment : Fragment() {
                 buttonHideNotification.alpha = 1f
             }
 
-            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode")
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater")
                 .addListenerForSingleValueEvent(object: ValueEventListener {
                     @SuppressLint("SetTextI18n")
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val temperatureMode = snapshot.getValue(String::class.java)!!
+                        val temperatureMode = snapshot.child("temperatureMode").getValue(String::class.java)!!
 
                         @Suppress("KotlinConstantConditions")
                         if (temperatureMode != " ") {
@@ -104,6 +104,8 @@ class HeaterTemperatureFragment : Fragment() {
                             cardViewTemperatureRange.alpha = 1f
                             cardViewHeaterStarted.alpha = 1f
                             buttonStopTemperatureMode.alpha = 1f
+
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").addValueEventListener(heaterStartedValueEventListener)
                         } else if (temperatureMode == " " && isTemperatureModeStarted) {
                             cardViewTemperatureRange.visibility = View.GONE
                             cardViewHeaterStarted.visibility = View.GONE
@@ -120,6 +122,22 @@ class HeaterTemperatureFragment : Fragment() {
 
                             inputLayoutTemperature.alpha = 1f
                             buttonStartTemperatureMode.alpha = 1f
+                        }
+                        if (snapshot.child("heaterStarted").getValue(Boolean::class.java)!!) {
+                            editPreferences.putBoolean("isHeaterStarted", true).apply()
+
+                            inputLayoutTemperature.visibility = View.GONE
+                            buttonStartTemperatureMode.visibility = View.GONE
+                            buttonStartHeater.visibility = View.GONE
+                            buttonStopHeater.visibility = View.VISIBLE
+                            buttonStopHeater.alpha = 1f
+                        } else if (!snapshot.child("heaterStarted").getValue(Boolean::class.java)!! && temperatureMode == " ") {
+                            editPreferences.putBoolean("isHeaterStarted", false).apply()
+
+                            buttonStopHeater.visibility = View.GONE
+                            inputLayoutTemperature.visibility = View.VISIBLE
+                            buttonStartTemperatureMode.visibility = View.VISIBLE
+                            buttonStartHeater.visibility = View.VISIBLE
                         }
                     }
 
@@ -178,7 +196,7 @@ class HeaterTemperatureFragment : Fragment() {
                         }
                     }, 250)
 
-                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").removeEventListener(heatingStartedValueEventListener)
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").removeEventListener(heaterStartedValueEventListener)
 
                     var isAnimationStarted = true
                     cardViewTemperatureRange.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
@@ -385,7 +403,7 @@ class HeaterTemperatureFragment : Fragment() {
         realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperature").addValueEventListener(temperatureValueEventListener)
 
         if (isTemperatureModeStarted) {
-            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").addValueEventListener(heatingStartedValueEventListener)
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").addValueEventListener(heaterStartedValueEventListener)
         }
     }
 
@@ -395,7 +413,7 @@ class HeaterTemperatureFragment : Fragment() {
         realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperature").removeEventListener(temperatureValueEventListener)
 
         if (isTemperatureModeStarted) {
-            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").removeEventListener(heatingStartedValueEventListener)
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").removeEventListener(heaterStartedValueEventListener)
         }
     }
 
@@ -408,13 +426,11 @@ class HeaterTemperatureFragment : Fragment() {
             }
         }
 
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(requireActivity(), "Не удалось получить температуру!", Toast.LENGTH_LONG).show()
-        }
+        override fun onCancelled(error: DatabaseError) {}
 
     }
 
-    private val heatingStartedValueEventListener = object: ValueEventListener {
+    private val heaterStartedValueEventListener = object: ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             if (snapshot.getValue(String::class.java) != null) {
                 if (snapshot.getValue(String::class.java)!!.last() == '1') {
@@ -425,9 +441,7 @@ class HeaterTemperatureFragment : Fragment() {
             }
         }
 
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(requireActivity(), "Не удалось получить то, запущен ли котёл по температуре!", Toast.LENGTH_LONG).show()
-        }
+        override fun onCancelled(error: DatabaseError) {}
 
     }
     
@@ -444,7 +458,7 @@ class HeaterTemperatureFragment : Fragment() {
             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").setValue("${inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature}" +
                     " ${inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature} 0")
 
-            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").addValueEventListener(heatingStartedValueEventListener)
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("temperatureMode").addValueEventListener(heaterStartedValueEventListener)
 
             textTemperatureRange.text = getString(R.string.min_max_temperature_text,
                 inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature,

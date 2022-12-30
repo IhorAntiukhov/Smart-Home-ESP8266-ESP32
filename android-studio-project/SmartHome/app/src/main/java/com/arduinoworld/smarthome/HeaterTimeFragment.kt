@@ -165,7 +165,7 @@ class HeaterTimeFragment : Fragment() {
                 if (isNetworkConnected(requireActivity())) {
                     if (!sharedPreferences.getBoolean("isHeaterStarted", false)) {
                         if (timestampsArrayList.size >= 1) {
-                            if (sharedPreferences.getBoolean("isHeaterTimeModeStarted", false)) {
+                            if (sharedPreferences.getBoolean("isHeaterTemperatureModeStarted", false)) {
                                 val alertDialogBuilder = androidx.appcompat.app.AlertDialog.Builder(requireActivity())
                                 alertDialogBuilder.setTitle("Совмещение режимов")
                                 alertDialogBuilder.setMessage("Вы хотите совместить режимы по времени и по температуре?")

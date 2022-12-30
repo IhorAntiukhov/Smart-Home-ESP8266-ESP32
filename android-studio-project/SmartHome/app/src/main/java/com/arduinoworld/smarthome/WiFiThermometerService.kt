@@ -88,9 +88,9 @@ class WiFiThermometerService : Service() {
             if (snapshot.key!! == "batteryLevel") {
                 batteryLevel = snapshot.getValue(Int::class.java)!!
             }
-            getString(R.string.wifi_thermometer_notification_text, temperature, humidity, batteryLevel)
+            "${getString(R.string.temperature_legend_label)}: $temperature°C ${getString(R.string.humidity_legend_label)}: $humidity%\n${getString(R.string.battery_level_text)}: $batteryLevel%"
         } else {
-            getString(R.string.wifi_thermometer_notification_without_level_text, temperature, humidity)
+            "${getString(R.string.temperature_legend_label)}: $temperature°C\n${getString(R.string.humidity_legend_label)}: $humidity%"
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

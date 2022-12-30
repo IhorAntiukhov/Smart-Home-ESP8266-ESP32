@@ -191,33 +191,36 @@ class HeatingTimerFragment : Fragment() {
                             isHeatingStarted = true
                             editPreferences.putBoolean("isHeatingStarted", true).apply()
 
-                            buttonStopHeating.visibility = View.GONE
-                            buttonStartHeating.visibility = View.VISIBLE
+                            buttonStartTimer.visibility = View.GONE
+                            buttonStartHeating.visibility = View.GONE
+                            buttonStopHeating.visibility = View.VISIBLE
+                            buttonStopHeating.alpha = 1f
+
                             buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
                             buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
                         } else if (!snapshot.child("heatingStarted").getValue(Boolean::class.java)!! && isHeatingStarted) {
                             isHeatingStarted = false
                             editPreferences.putBoolean("isHeatingStarted", false).apply()
 
-                            buttonStartTimer.visibility = View.GONE
-                            buttonStartHeating.visibility = View.GONE
-                            buttonStopHeating.visibility = View.VISIBLE
+                            buttonStopHeating.visibility = View.GONE
+                            buttonStartTimer.visibility = View.VISIBLE
+                            buttonStartHeating.visibility = View.VISIBLE
 
                             buttonIncrease.setImageResource(R.drawable.ic_increase)
                             buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                        }
-                        if (maxHeatingElements > 1) {
-                            heatingElements = snapshot.child("heatingElements").getValue(Int::class.java)!!
-                            editPreferences.putInt("TimerHeatingElements", heatingElements).apply()
+                            if (maxHeatingElements > 1) {
+                                heatingElements = snapshot.child("heatingElements").getValue(Int::class.java)!!
+                                editPreferences.putInt("TimerHeatingElements", heatingElements).apply()
 
-                            if (heatingElements == maxHeatingElements) {
-                                buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                                buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
-                            } else if (heatingElements == 1) {
-                                buttonIncrease.setImageResource(R.drawable.ic_increase)
-                                buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                                if (heatingElements == maxHeatingElements) {
+                                    buttonDecrease.setImageResource(R.drawable.ic_decrease)
+                                    buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
+                                } else if (heatingElements == 1) {
+                                    buttonIncrease.setImageResource(R.drawable.ic_increase)
+                                    buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                                }
+                                textHeatingElements.text = getString(R.string.heating_elements_text, heatingElements)
                             }
-                            textHeatingElements.text = getString(R.string.heating_elements_text, heatingElements)
                         }
                     }
 

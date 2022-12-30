@@ -136,7 +136,7 @@ class SmartRemotesFragment : Fragment() {
                     if (!sharedPreferences.getBoolean("isACTimeModeStarted", false)) {
                         acState = !acState
                         editPreferences.putBoolean("isACStarted", acState)
-                        var acSettings = sharedPreferences.getString("ACSettings", "").toString()
+                        var acSettings = sharedPreferences.getString("ACSettings", "16 00000").toString()
                         acSettings = acSettings.substring(0, acSettings.length - 1)
 
                         if (acState) {
@@ -235,47 +235,55 @@ class SmartRemotesFragment : Fragment() {
         with(binding) {
             when (snapshot.key) {
                 "lightRemoteButton" -> {
-                    if (snapshot.getValue(String::class.java)!!.last() == '1') {
-                        lightState = true
-                        imageLightState.setImageResource(R.drawable.ic_light_on)
-                        textLightState.text = getString(R.string.on_text)
-                    } else {
-                        lightState = false
-                        imageLightState.setImageResource(R.drawable.ic_light_off)
-                        textLightState.text = getString(R.string.off_text)
+                    if (snapshot.getValue(String::class.java) != null) {
+                        if (snapshot.getValue(String::class.java)!!.last() == '1') {
+                            lightState = true
+                            imageLightState.setImageResource(R.drawable.ic_light_on)
+                            textLightState.text = getString(R.string.on_text)
+                        } else {
+                            lightState = false
+                            imageLightState.setImageResource(R.drawable.ic_light_off)
+                            textLightState.text = getString(R.string.off_text)
+                        }
                     }
                 }
                 "tvRemoteButton" -> {
-                    if (snapshot.getValue(String::class.java)!!.last() == '1') {
-                        tvState = true
-                        imageTvState.setImageResource(R.drawable.ic_tv_on)
-                        textTvState.text = getString(R.string.on_text)
-                    } else {
-                        tvState = false
-                        imageTvState.setImageResource(R.drawable.ic_tv_off)
-                        textTvState.text = getString(R.string.off_text)
+                    if (snapshot.getValue(String::class.java) != null) {
+                        if (snapshot.getValue(String::class.java)!!.last() == '1') {
+                            tvState = true
+                            imageTvState.setImageResource(R.drawable.ic_tv_on)
+                            textTvState.text = getString(R.string.on_text)
+                        } else {
+                            tvState = false
+                            imageTvState.setImageResource(R.drawable.ic_tv_off)
+                            textTvState.text = getString(R.string.off_text)
+                        }
                     }
                 }
                 "acRemote" -> {
-                    if (snapshot.getValue(String::class.java)!!.last() == '1') {
-                        acState = true
-                        imageACState.setImageResource(R.drawable.ic_ac_on)
-                        textACState.text = getString(R.string.on_text)
-                    } else {
-                        acState = false
-                        imageACState.setImageResource(R.drawable.ic_ac_off)
-                        textACState.text = getString(R.string.off_text)
+                    if (snapshot.getValue(String::class.java) != null) {
+                        if (snapshot.getValue(String::class.java)!!.last() == '1') {
+                            acState = true
+                            imageACState.setImageResource(R.drawable.ic_ac_on)
+                            textACState.text = getString(R.string.on_text)
+                        } else {
+                            acState = false
+                            imageACState.setImageResource(R.drawable.ic_ac_off)
+                            textACState.text = getString(R.string.off_text)
+                        }
                     }
                 }
                 "rgbRemoteButton" -> {
-                    if (snapshot.getValue(String::class.java)!!.last() == '1') {
-                        rgbState = true
-                        imageRGBState.setImageResource(R.drawable.ic_light_on)
-                        textRGBState.text = getString(R.string.on_text)
-                    } else {
-                        rgbState = false
-                        imageRGBState.setImageResource(R.drawable.ic_light_off)
-                        textRGBState.text = getString(R.string.off_text)
+                    if (snapshot.getValue(String::class.java) != null) {
+                        if (snapshot.getValue(String::class.java)!!.last() == '1') {
+                            rgbState = true
+                            imageRGBState.setImageResource(R.drawable.ic_light_on)
+                            textRGBState.text = getString(R.string.on_text)
+                        } else {
+                            rgbState = false
+                            imageRGBState.setImageResource(R.drawable.ic_light_off)
+                            textRGBState.text = getString(R.string.off_text)
+                        }
                     }
                 }
             }

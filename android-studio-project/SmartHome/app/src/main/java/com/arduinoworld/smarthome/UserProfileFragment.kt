@@ -80,12 +80,13 @@ class UserProfileFragment : Fragment() {
                         buttonDeleteUser.textButton.visibility = View.GONE
                         buttonDeleteUser.progressBarButton.visibility = View.VISIBLE
 
-                        val gson = Gson()
-                        val addedDevicesArrayList: ArrayList<Device> = gson.fromJson(
-                            sharedPreferences.getString("DevicesArrayList", ""),
-                            object : TypeToken<ArrayList<Device?>?>() {}.type
-                        )
-                        if (addedDevicesArrayList.size >= 1) {
+                        if (sharedPreferences.getString("DevicesArrayList", "") != "") {
+                            val gson = Gson()
+                            val addedDevicesArrayList: ArrayList<Device> = gson.fromJson(
+                                sharedPreferences.getString("DevicesArrayList", ""),
+                                object : TypeToken<ArrayList<Device?>?>() {}.type
+                            )
+
                             with(realtimeDatabase.child(firebaseAuth.currentUser!!.uid)) {
                                 addedDevicesArrayList.forEach { device ->
                                     when (device.deviceName) {
@@ -127,7 +128,6 @@ class UserProfileFragment : Fragment() {
                                                         }
                                                 }
                                             }
-
                                         }
                                         getString(R.string.text_meter_reader) -> {
                                             child("MeterReader").addChildEventListener(object: ChildEventListener {

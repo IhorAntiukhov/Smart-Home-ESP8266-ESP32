@@ -591,7 +591,7 @@ class DevicesFragment : Fragment() {
                             tabLayoutHeater.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
                             viewPagerHeater.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
                         }
-                        if (selectedDeviceId != 1) radioGroupHeatingOrBoiler.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
+                        if (selectedDeviceId == 1) radioGroupHeatingOrBoiler.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
                         fabBack.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
                         fabDeviceSettings.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
                         fabDeleteDevice.animate().alpha(0f).setDuration(500).setStartDelay(0)
@@ -793,6 +793,7 @@ class DevicesFragment : Fragment() {
     }
 
     private val allDevicesRecyclerAdapterClickListener = object: DevicesRecyclerAdapter.OnItemClickListener {
+        @SuppressLint("NotifyDataSetChanged")
         override fun onItemClick(position: Int) {
             vibrate()
             with(binding) {
@@ -844,7 +845,7 @@ class DevicesFragment : Fragment() {
                             addItemDecoration(DeviceItemDecoration())
                         }
                     } else {
-                        addedDevicesRecyclerAdapter.notifyItemInserted(addedDevicesArrayList.size - 1)
+                        addedDevicesRecyclerAdapter.notifyDataSetChanged()
                     }
 
                     var isAnimationStarted = true

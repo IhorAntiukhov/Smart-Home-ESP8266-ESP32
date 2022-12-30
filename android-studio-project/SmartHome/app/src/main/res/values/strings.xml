@@ -37,8 +37,7 @@
     <string name="wifi_thermometer_graph_no_data_text">Показания термометра не получены!</string>
     <string name="temperature_legend_label">Температура</string>
     <string name="humidity_legend_label">Влажность</string>
-    <string name="wifi_thermometer_notification_without_level_text">Температура: %1d°C\nВлажность: %2d%%</string>
-    <string name="wifi_thermometer_notification_text">Температура: %1d°C Влажность: %2d%%\nУровень заряда аккумулятора: %3d%%</string>
+    <string name="battery_level_text">Уровень заряда аккумулятора</string>
     <string name="button_heating">Котёл</string>
     <string name="button_boiler">Бойлер</string>
     <string name="tab_item_timer_mode">По таймеру</string>

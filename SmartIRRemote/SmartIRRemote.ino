@@ -61,7 +61,7 @@ String userUID;
 /* переменная для того, чтобы при запуске слушателя изменения данных, не отправлялась команда на 
  остановку кондиционера, не отправлялись команды пультов и не сохранялись настройки в SPIFFS */
 bool streamStartedNow = true;
-bool resetSettingsRequest; // запрос на удаление настроек из Firebase после их отправки пользователем
+bool resetSettingsRequest;  // запрос на удаление настроек из Firebase после их отправки пользователем
 
 byte hours = 0;
 byte minutes = 0;
@@ -148,7 +148,7 @@ void streamCallback(MultiPathStream stream) {
       if (!streamStartedNow) {
         // записываем параметры работы кондиционера в SPIFFS для того, чтобы они сохранились после перезагрузки платы
         helper.saveToSPIFFS("/ACSettings.txt", acRemote.substring(acRemote.indexOf(" ") + 1, acRemote.length()));
-        if (acRemote.substring(0, 11) == "temperature") {                                                          // если получена команда на установку температуры
+        if (acRemote.substring(0, 11) == "temperature") {  // если получена команда на установку температуры
           ac.next.degrees = (acRemote.substring(11, acRemote.indexOf(" "))).toInt();
           ac.sendAc();
           Serial.println("Температура: " + String(acRemote.substring(11, acRemote.indexOf(" "))) + "°C");
@@ -219,6 +219,7 @@ void handleRoot() {
   server.send(200, "text/plain", "Ok\r\n");
   if (server.hasArg("light_remote")) {  // если получен id кнопки пульта освещения, которую нужно настроить
     tvRemoteSettingsButton = 0;
+    configureACRemoteRequest = false;
     lightRemoteSettingsButton = (server.arg("light_remote")).toInt();
     Serial.println("Кнопка пульта освещения: " + String(lightRemoteSettingsButton));
   }
@@ -231,6 +232,7 @@ void handleRoot() {
 
   if (server.hasArg("tv_remote")) {  // если получен id кнопки пульта телевизора, которую нужно настроить
     lightRemoteSettingsButton = 0;
+    configureACRemoteRequest = false;
     tvRemoteSettingsButton = (server.arg("tv_remote")).toInt();
     Serial.println("Кнопка пульта телевизора: " + String(tvRemoteSettingsButton));
   }
@@ -247,18 +249,18 @@ void handleRoot() {
 
 // слушатель получения запросов от пользователя того, настроена ли выбранная кнопка пульта освещения
 void handleIsLightRemoteButtonConfigured() {
-  configureACRemoteRequest = false;
   server.send(200, "text/plain", String(lightRemoteSettingsButton) + String(lightRemoteConfiguredButtons[lightRemoteSettingsButton - 1]) + "\r\n");
 }
 
 // слушатель получения запросов от пользователя того, настроена ли выбранная кнопка пульта телевизора
 void handleIsTvRemoteButtonConfigured() {
-  configureACRemoteRequest = false;
   server.send(200, "text/plain", String(tvRemoteSettingsButton) + String(tvRemoteConfiguredButtons[tvRemoteSettingsButton - 1]) + "\r\n");
 }
 
 // слушатель получения запросов от пользователя того, настроен ли пульт кондиционера
 void handleIsAcRemoteConfigured() {
+  lightRemoteSettingsButton = 0;
+  tvRemoteSettingsButton = 0;
   configureACRemoteRequest = true;
   server.send(200, "text/plain", String(isAcRemoteConfigured) + "\r\n");
 }
@@ -359,12 +361,12 @@ void loop() {
         }
       }
 
-      if (resetSettingsRequest) { // если получен запрос на удаление настроек из Firebase и их сохранение в SPIFFS
+      if (resetSettingsRequest) {  // если получен запрос на удаление настроек из Firebase и их сохранение в SPIFFS
         resetSettingsRequest = false;
 
         if (!Firebase.RTDB.setString(&firebaseData, ("/" + userUID + "/SmartRemotes/settings").c_str(), " "))
           Serial.println("Не удалось удалить настройки из Firebase :( Причина: " + String(firebaseData.errorReason().c_str()));
-          
+
         if (helper.saveToSPIFFS("/Settings.txt", settings)) ESP.restart();
       }
     } else {

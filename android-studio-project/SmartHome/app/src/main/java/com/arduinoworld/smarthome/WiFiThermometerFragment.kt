@@ -17,8 +17,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.arduinoworld.smarthome.MainActivity.Companion.editPreferences
 import com.arduinoworld.smarthome.MainActivity.Companion.firebaseAuth
+import com.arduinoworld.smarthome.MainActivity.Companion.isHapticFeedbackEnabled
 import com.arduinoworld.smarthome.MainActivity.Companion.realtimeDatabase
 import com.arduinoworld.smarthome.MainActivity.Companion.sharedPreferences
+import com.arduinoworld.smarthome.MainActivity.Companion.vibrator
 import com.arduinoworld.smarthome.databinding.FragmentWifiThermometerBinding
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.Legend
@@ -317,8 +319,8 @@ class WiFiThermometerFragment : Fragment() {
 
     @Suppress("DEPRECATION")
     private fun vibrate() {
-        if (MainActivity.vibrator.hasVibrator()) {
-            if (MainActivity.isHapticFeedbackEnabled == "1") {
+        if (vibrator.hasVibrator()) {
+            if (isHapticFeedbackEnabled == "1") {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     binding.buttonShowNotification.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                 } else {
@@ -326,9 +328,9 @@ class WiFiThermometerFragment : Fragment() {
                 }
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    MainActivity.vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
+                    vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    MainActivity.vibrator.vibrate(20)
+                    vibrator.vibrate(20)
                 }
             }
         }

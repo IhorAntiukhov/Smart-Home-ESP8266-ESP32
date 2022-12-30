@@ -37,8 +37,7 @@
     <string name="wifi_thermometer_graph_no_data_text">Thermometer reading not received!</string>
     <string name="temperature_legend_label">Temperature</string>
     <string name="humidity_legend_label">Humidity</string>
-    <string name="wifi_thermometer_notification_without_level_text">Temperature: %1d°C\Humidity: %2d%%</string>
-    <string name="wifi_thermometer_notification_text">Temperature: %1d°C Humidity: %2d%%\nBattery level: %3d%%</string>
+    <string name="battery_level_text">Battery level</string>
     <string name="button_heating">Heating</string>
     <string name="button_boiler">Boiler</string>
     <string name="tab_item_timer_mode">Timer</string>

@@ -27,7 +27,6 @@ class HeatingTemperatureFragment : Fragment() {
     private var decreaseInMinTemperature = 2
     private var increaseInMaxTemperature = 1
     private var heatingElements = 1
-    private var listenerAddedNow = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -155,6 +154,8 @@ class HeatingTemperatureFragment : Fragment() {
                             cardViewTemperatureRange.alpha = 1f
                             cardViewHeatingStarted.alpha = 1f
                             buttonStopTemperatureMode.alpha = 1f
+
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").addValueEventListener(heatingStartedValueEventListener)
                         } else if (temperatureMode == " " && isTemperatureModeStarted) {
                             cardViewTemperatureRange.visibility = View.GONE
                             cardViewHeatingStarted.visibility = View.GONE
@@ -292,7 +293,6 @@ class HeatingTemperatureFragment : Fragment() {
             editPreferences.putInt("HeatingMinTemperature", inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature)
             editPreferences.putInt("HeatingMaxTemperature", inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature).apply()
 
-            listenerAddedNow = true
             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").setValue("${inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature} ${inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature} ${heatingElements}0")
             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").addValueEventListener(heatingStartedValueEventListener)
 
@@ -357,32 +357,29 @@ class HeatingTemperatureFragment : Fragment() {
 
     private val temperatureValueEventListener = object: ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            val temperature = snapshot.getValue(Int::class.java)!!
-            binding.textTemperature.text = getString(R.string.temperature_text, temperature)
-            binding.progressBarTemperature.setProgress(temperature.toFloat())
+            if (snapshot.getValue(Int::class.java) != null) {
+                val temperature = snapshot.getValue(Int::class.java)!!
+                binding.textTemperature.text = getString(R.string.temperature_text, temperature)
+                binding.progressBarTemperature.setProgress(temperature.toFloat())
+            }
         }
 
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(requireActivity(), "Не удалось получить температуру!", Toast.LENGTH_LONG).show()
-        }
+        override fun onCancelled(error: DatabaseError) {}
 
     }
 
     private val heatingStartedValueEventListener = object: ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            if (!listenerAddedNow) {
+            if (snapshot.getValue(Int::class.java) != null) {
                 if (snapshot.getValue(String::class.java)!!.last() == '1') {
                     binding.textHeatingStarted.text = getString(R.string.heating_started_text)
                 } else {
                     binding.textHeatingStarted.text = getString(R.string.heating_stopped_text)
                 }
             }
-            listenerAddedNow = false
         }
 
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(requireActivity(), "Не удалось получить то, запущен ли котёл по температуре!", Toast.LENGTH_LONG).show()
-        }
+        override fun onCancelled(error: DatabaseError) {}
 
     }
 
