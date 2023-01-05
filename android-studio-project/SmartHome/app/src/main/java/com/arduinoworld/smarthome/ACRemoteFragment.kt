@@ -41,6 +41,7 @@ class ACRemoteFragment : Fragment() {
 
     private lateinit var binding: FragmentAcRemoteBinding
     private lateinit var recyclerAdapter: TimeRecyclerAdapter
+    private lateinit var gson: Gson
     private lateinit var handler: Handler
     private var temperature = 0
     private var acMode = 0
@@ -50,6 +51,8 @@ class ACRemoteFragment : Fragment() {
     private var isACStarted = false
     private var isTimeModeStarted = false
     private var remoteSettingsMode = false
+    private var timestampsArrayList = ArrayList<HeatingOrBoilerTimestamp>()
+    private var clockFormat = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -67,20 +70,18 @@ class ACRemoteFragment : Fragment() {
             isACStarted = sharedPreferences.getBoolean("isACStarted", false)
             isTimeModeStarted = sharedPreferences.getBoolean("isACTimeModeStarted", false)
 
-            var acOnOffTime = false
-            var timestampsArrayList = ArrayList<HeatingOrBoilerTimestamp>()
             val isSystem24Hour = DateFormat.is24HourFormat(requireActivity())
-            val clockFormat = if (isSystem24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
-            val calendar = Calendar.getInstance()
+            clockFormat = if (isSystem24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
 
-            val gson = Gson()
+            gson = Gson()
             if (sharedPreferences.getString("ACTimestampsArrayList", "") != "") {
                 timestampsArrayList = gson.fromJson(sharedPreferences.getString("ACTimestampsArrayList", ""), object : TypeToken<ArrayList<HeatingOrBoilerTimestamp?>?>() {}.type)
-                recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
-                recyclerView.apply {
-                    adapter = recyclerAdapter
-                    layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                }
+            }
+            recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
+            recyclerAdapter.setOnItemClickListener(recyclerAdapterClickListener)
+            recyclerView.apply {
+                adapter = recyclerAdapter
+                layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             }
 
             setACMode()
@@ -160,7 +161,6 @@ class ACRemoteFragment : Fragment() {
                         }
                         val time = snapshot.child("acOnOffTime").getValue(String::class.java)!!
                         if (time != " ") {
-                            val timestampsArrayListSize = timestampsArrayList.size
                             timestampsArrayList.clear()
                             var onOffTime = false
                             var i = 0
@@ -171,27 +171,17 @@ class ACRemoteFragment : Fragment() {
                                     onOffTime, 0))
                                 i += 4
                             }
-                            if (timestampsArrayListSize > 0) {
-                                recyclerAdapter.notifyDataSetChanged()
-                            } else {
-                                recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
-                                recyclerView.apply {
-                                    adapter = recyclerAdapter
-                                    layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                                }
-                            }
+                            recyclerAdapter.notifyDataSetChanged()
 
                             isTimeModeStarted = true
-                            buttonStartAC.visibility = View.GONE
                             editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+
+                            buttonStartAC.visibility = View.GONE
                         } else {
-                            val timestampsArrayListSize = timestampsArrayList.size
-                            timestampsArrayList.clear()
-                            if (timestampsArrayListSize > 0) {
-                                recyclerAdapter.notifyDataSetChanged()
-                            }
                             isTimeModeStarted = false
-                            editPreferences.putString("ACTimestampsArrayList", "").apply()
+                            editPreferences.putBoolean("isACTimeModeStarted", false).apply()
+
+                            buttonStartAC.visibility = View.VISIBLE
                         }
                     }
 
@@ -303,15 +293,6 @@ class ACRemoteFragment : Fragment() {
             buttonStartAC.setOnClickListener {
                 vibrate()
                 isACStarted = true
-                if (timestampsArrayList.size > 1) {
-                    editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList))
-                    var acOnOffTimeNodeValue = ""
-                    timestampsArrayList.forEach {
-                        acOnOffTimeNodeValue += it.time.removeRange(2, 3)
-                    }
-                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("SmartRemotes").child("acTime")
-                        .setValue(acOnOffTimeNodeValue)
-                }
                 editPreferences.putBoolean("isACStarted", true)
                 sendRemoteButton("on")
 
@@ -350,7 +331,8 @@ class ACRemoteFragment : Fragment() {
                 vibrate()
                 isACStarted = false
                 editPreferences.putBoolean("isACStarted", false)
-                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("SmartRemotes").child("acTime")
+
+                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("SmartRemotes").child("acOnOffTime")
                     .setValue(" ")
                 sendRemoteButton("off")
 
@@ -386,7 +368,6 @@ class ACRemoteFragment : Fragment() {
 
             buttonTimeMode.setOnClickListener {
                 vibrate()
-
                 if (!(isACStarted && timestampsArrayList.size == 0)) {
                     isTimeModeSelected = true
                     var isAnimationStarted = true
@@ -464,20 +445,22 @@ class ACRemoteFragment : Fragment() {
             buttonDeleteTime.setOnClickListener {
                 vibrate()
                 if (timestampsArrayList.size >= 1) {
-                    val marginLayoutParams = layoutTime.layoutParams as MarginLayoutParams
-                    marginLayoutParams.topMargin = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        45f,
-                        requireActivity().resources.displayMetrics
-                    ).toInt()
-                    layoutTime.layoutParams = marginLayoutParams
+                    timestampsArrayList.removeAt(timestampsArrayList.size - 1)
+                    recyclerAdapter.notifyItemRemoved(timestampsArrayList.size)
+                    if (timestampsArrayList.size > 0) {
+                        editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+                    } else {
+                        val marginLayoutParams = layoutTime.layoutParams as MarginLayoutParams
+                        marginLayoutParams.topMargin = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP,
+                            45f,
+                            requireActivity().resources.displayMetrics
+                        ).toInt()
+                        layoutTime.layoutParams = marginLayoutParams
 
-                    recyclerView.visibility = View.GONE
-                    val timestampsArrayListSize = timestampsArrayList.size
-                    timestampsArrayList.clear()
-                    recyclerAdapter.notifyItemRangeRemoved(0, timestampsArrayListSize)
-                    acOnOffTime = false
-                    editPreferences.putString("ACTimestampsArrayList", "").apply()
+                        recyclerView.visibility = View.GONE
+                        editPreferences.putString("ACTimestampsArrayList", "").apply()
+                    }
                 } else {
                     Toast.makeText(requireActivity(), "Добавьте хотя бы\nодно время включения\n/выключения!", Toast.LENGTH_LONG).show()
                 }
@@ -485,7 +468,7 @@ class ACRemoteFragment : Fragment() {
 
             buttonAddTime.setOnClickListener {
                 vibrate()
-
+                val calendar = Calendar.getInstance()
                 val timePicker = MaterialTimePicker.Builder()
                     .setTimeFormat(clockFormat)
                     .setTitleText("Выберите время")
@@ -495,7 +478,11 @@ class ACRemoteFragment : Fragment() {
 
                 timePicker.addOnPositiveButtonClickListener {
                     vibrate()
-                    acOnOffTime = !acOnOffTime
+                    val acOnOffTime = if (timestampsArrayList.size > 0) {
+                        !timestampsArrayList[timestampsArrayList.size - 1].onOff
+                    } else {
+                        true
+                    }
                     var hour = timePicker.hour.toString()
                     var minute = timePicker.minute.toString()
                     if (hour.toInt() < 10) {
@@ -507,15 +494,9 @@ class ACRemoteFragment : Fragment() {
                     timestampsArrayList.add(HeatingOrBoilerTimestamp("$hour:$minute", acOnOffTime, 0))
                     recyclerView.visibility = View.VISIBLE
                     recyclerView.alpha = 1f
-                    if (timestampsArrayList.size > 1) {
-                        recyclerAdapter.notifyItemInserted(timestampsArrayList.size - 1)
-                    } else {
-                        recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
-                        recyclerView.apply {
-                            adapter = recyclerAdapter
-                            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                        }
 
+                    recyclerAdapter.notifyItemInserted(timestampsArrayList.size - 1)
+                    if (timestampsArrayList.size == 1) {
                         val marginLayoutParams = layoutTime.layoutParams as MarginLayoutParams
                         marginLayoutParams.topMargin = TypedValue.applyDimension(
                             TypedValue.COMPLEX_UNIT_DIP,
@@ -524,6 +505,7 @@ class ACRemoteFragment : Fragment() {
                         ).toInt()
                         layoutTime.layoutParams = marginLayoutParams
                     }
+                    editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
                 }
                 timePicker.addOnNegativeButtonClickListener {
                     vibrate()
@@ -540,8 +522,7 @@ class ACRemoteFragment : Fragment() {
                     }
 
                     isTimeModeStarted = true
-                    editPreferences.putBoolean("isACTimeModeStarted", true)
-                    editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+                    editPreferences.putBoolean("isACTimeModeStarted", true).apply()
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("SmartRemotes").child("acOnOffTime").setValue(acOnOffTimeNodeValue)
 
                     var isAnimationStarted = true
@@ -677,6 +658,7 @@ class ACRemoteFragment : Fragment() {
                     if (sharedPreferences.getBoolean("CloseTimeMode", false)) {
                         isTimeModeSelected = false
                         editPreferences.putBoolean("CloseTimeMode", false).apply()
+
                         var isAnimationStarted = true
                         recyclerView.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
                         layoutTime.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100).start()
@@ -717,6 +699,7 @@ class ACRemoteFragment : Fragment() {
                 } else if (key == "OpenRemoteSettingsMode") {
                     if (sharedPreferences.getBoolean("OpenRemoteSettingsMode", false)) {
                         editPreferences.putBoolean("OpenRemoteSettingsMode", false).apply()
+
                         var isAnimationStarted = true
                         layoutTemperature.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
                         layoutModeFanSpeed.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(75).start()
@@ -753,6 +736,7 @@ class ACRemoteFragment : Fragment() {
                 } else if (key == "CloseRemoteSettingsMode") {
                     if (sharedPreferences.getBoolean("CloseRemoteSettingsMode", false)) {
                         editPreferences.putBoolean("CloseRemoteSettingsMode", false).apply()
+
                         var isAnimationStarted = true
                         layoutConfigureACRemote.animate().alpha(0f).translationX(0f).setDuration(500).setStartDelay(0)
                             .setListener(object: Animator.AnimatorListener {
@@ -849,6 +833,41 @@ class ACRemoteFragment : Fragment() {
                 handler.postDelayed(this, 500)
             }
         }
+    }
+
+    private val recyclerAdapterClickListener = object: TimeRecyclerAdapter.OnItemClickListener {
+        override fun onItemClick(position: Int) {
+            if (!isTimeModeStarted) {
+                vibrate()
+                val calendar = Calendar.getInstance()
+                val timePicker = MaterialTimePicker.Builder()
+                    .setTimeFormat(clockFormat)
+                    .setTitleText("Выберите время")
+                    .setHour(calendar.get(Calendar.HOUR_OF_DAY))
+                    .setMinute(calendar.get(Calendar.MINUTE))
+                    .build()
+
+                timePicker.addOnPositiveButtonClickListener {
+                    vibrate()
+                    var hour = timePicker.hour.toString()
+                    var minute = timePicker.minute.toString()
+                    if (hour.toInt() < 10) {
+                        hour = "0$hour"
+                    }
+                    if (minute.toInt() < 10) {
+                        minute = "0$minute"
+                    }
+                    timestampsArrayList[position] = HeatingOrBoilerTimestamp("$hour:$minute", timestampsArrayList[position].onOff, 0)
+                    recyclerAdapter.notifyItemChanged(position)
+                    editPreferences.putString("ACTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+                }
+                timePicker.addOnNegativeButtonClickListener {
+                    vibrate()
+                }
+                timePicker.show(requireActivity().supportFragmentManager, "timePicker")
+            }
+        }
+
     }
 
     private fun booleanToString(variable: Boolean): String {

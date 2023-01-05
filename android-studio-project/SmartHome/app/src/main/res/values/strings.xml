@@ -178,4 +178,7 @@
     <string name="preference_haptic_feedback">Тип вибрации</string>
     <string name="preference_category_other_settings">Другие настройки</string>
     <string name="preference_default_settings">Настройки по умолчанию</string>
+    <string name="waiting_for_response_text">Ждём ответа от платы &#8230;</string>
+    <string name="response_received_text">Ответ от платы получен!</string>
+    <string name="response_not_received_text">Ответ от платы не получен!</string>
 </resources>

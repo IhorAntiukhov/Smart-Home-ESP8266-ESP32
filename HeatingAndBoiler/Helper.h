@@ -78,8 +78,6 @@ public:
       while (timeModeSettingsFile.available()) timeModeSettings = timeModeSettingsFile.readString();
       timeModeSettingsFile.close();
 
-      Serial.println("Настройки режима по времени: " + String(timeModeSettings));
-
       if (timeModeSettings.substring(2, 3) == "1") {
         boilerOnOff = true;
         digitalWrite(boilerRelayPin, true);
@@ -299,6 +297,20 @@ public:
                                 String &timeModeSettings, short heatingRelayPin, short heatingElementsRelayPin, bool boilerOnOff) {
     String nextHeatingTimestamp = heatingOnOffTime.substring(heatingTimestampId, heatingTimestampId + 4);  // записываем следующее время включения/выключения котла
     if (formattedHours + formattedMinutes == nextHeatingTimestamp) {                                       // если текущее время равно времени включения/выключения котла
+      controlHeating(heatingOnOffTime, timeHeatingElements, heatingTimestampId, timeModeSettings, heatingRelayPin, heatingElementsRelayPin, boilerOnOff, false);
+      if (heatingTimestampId + 4 < heatingOnOffTime.length()) {
+        heatingTimestampId = heatingTimestampId + 4;
+      } else {
+        heatingTimestampId = 0;
+      }
+    }
+  }
+
+  // метод для управления котлом когда текущее время равно времени включения или выключения, или включения котла при запуске режима
+  void controlHeating(String heatingOnOffTime, String timeHeatingElements, short heatingTimestampId, String &timeModeSettings,
+                      short heatingRelayPin, short heatingElementsRelayPin, bool boilerOnOff, bool decreaseTimestampId) {
+    if (!(heatingTimestampId == 0 && timeHeatingElements.length() == 1) || !decreaseTimestampId) {
+      if (decreaseTimestampId) heatingTimestampId = heatingTimestampId - 4;
       if (timeHeatingElements.substring(heatingTimestampId / 4, heatingTimestampId / 4 + 1) == "1") {
         digitalWrite(heatingElementsRelayPin, LOW);
         digitalWrite(heatingRelayPin, HIGH);
@@ -315,11 +327,6 @@ public:
         Serial.println("Котёл остановлен по времени");
       }
       saveToSPIFFS("/TimeMode.txt", timeModeSettings + String(boilerOnOff));
-      if (heatingTimestampId + 4 < heatingOnOffTime.length()) {
-        heatingTimestampId = heatingTimestampId + 4;
-      } else {
-        heatingTimestampId = 0;
-      }
     }
   }
 
@@ -329,6 +336,22 @@ public:
                                         short heatingRelayPin, short heatingElementsRelayPin) {
     String nextHeatingTimestamp = heatingOnOffTime.substring(heatingTimestampId, heatingTimestampId + 4);  // записываем следующее время включения/выключения котла
     if (formattedHours + formattedMinutes == nextHeatingTimestamp) {                                       // если текущее время равно времени запуска/остановки режима по температуре
+      controlTemperatureMode(heatingOnOffTime, timeHeatingElements, heatingTimestampId, isTemperatureModeStartedInTimeMode, isTemperatureModeStartedNow,
+                             heatingElementsInTemperatureMode, timeModeSettings, boilerOnOff, heatingRelayPin, false);
+      if (heatingTimestampId + 4 < heatingOnOffTime.length()) {
+        heatingTimestampId = heatingTimestampId + 4;
+      } else {
+        heatingTimestampId = 0;
+      }
+    }
+  }
+
+  // метод для управления режимом по температуре когда текущее время равно времени запуска или остановки режима, или запуска режима по температуре при запуске режима по времени
+  void controlTemperatureMode(String heatingOnOffTime, String timeHeatingElements, short heatingTimestampId, bool &isTemperatureModeStartedInTimeMode,
+                              bool &isTemperatureModeStartedNow, byte &heatingElementsInTemperatureMode, String &timeModeSettings, bool boilerOnOff,
+                              short heatingRelayPin, bool decreaseTimestampId) {
+    if (!(heatingTimestampId == 0 && timeHeatingElements.length() == 1) || !decreaseTimestampId) {
+      if (decreaseTimestampId) heatingTimestampId = heatingTimestampId - 4;
       if (timeHeatingElements.substring(heatingTimestampId / 4, heatingTimestampId / 4 + 1) == "1") {
         isTemperatureModeStartedInTimeMode = true;
         isTemperatureModeStartedNow = true;
@@ -349,11 +372,6 @@ public:
         Serial.println("Режим по температуре остановлен по времени");
       }
       saveToSPIFFS("/TimeMode.txt", timeModeSettings + String(boilerOnOff));
-      if (heatingTimestampId + 4 < heatingOnOffTime.length()) {
-        heatingTimestampId = heatingTimestampId + 4;
-      } else {
-        heatingTimestampId = 0;
-      }
     }
   }
 
@@ -378,10 +396,44 @@ public:
     }
   }
 
+  // метод для включения бойлера при запуске режима по времени, если текущее время между предыдущим временем включения и следующим временем выключения бойлера
+  void controlBoiler(String boilerOnOffTime, bool &boilerOnOff, short boilerTimestampId, String &timeModeSettings, short boilerRelayPin) {
+    String boilerOnOffAlgo;
+    for (int i = 0; i < boilerOnOffTime.length() / 4; i++) {
+      boilerOnOff = !boilerOnOff;
+      if (boilerOnOff) {
+        boilerOnOffAlgo += "1";
+      } else {
+        boilerOnOffAlgo += "0";
+      }
+    }
+    if (boilerTimestampId < boilerOnOffTime.length()) {
+      if (!(boilerTimestampId == 0 && boilerOnOffAlgo == "1")) {
+        boilerTimestampId = boilerTimestampId - 4;
+        if (boilerOnOffAlgo.substring(boilerTimestampId / 4, boilerTimestampId / 4 + 1) == "1") {
+          boilerOnOff = true;
+          Serial.println("Бойлер запущен по времени");
+        } else {
+          boilerOnOff = false;
+          Serial.println("Бойлер остановлен по времени");
+        }
+        digitalWrite(boilerRelayPin, boilerOnOff);
+        saveToSPIFFS("/TimeMode.txt", timeModeSettings + String(boilerOnOff));
+      }
+    } else {
+      if (boilerOnOffAlgo.endsWith("1")) {
+        boilerOnOff = true;
+        digitalWrite(boilerRelayPin, HIGH);
+        Serial.println("Бойлер запущен по времени");
+        saveToSPIFFS("/TimeMode.txt", timeModeSettings + String(boilerOnOff));
+      }
+    }
+  }
+
   // метод для управления котлом по температуре
   void controlHeatingInTemperatureMode(byte temperature, byte minTemperature, byte maxTemperature, String temperatureMode, bool &temperatureModePhase,
                                        bool &isTemperatureModeStartedNow, byte heatingElements, short heatingRelayPin, short heatingElementsRelayPin,
-                                       FirebaseData &firebaseData, String userUID, bool &temperatureRangeNotChanged) {
+                                       FirebaseData &firebaseData, String userUID) {
     // если режим по температуре в 1 фазе и текущая температура меньше минимальной температуры, или если режим по температуре только запустился и текущая температура меньше максимальной
     if ((!temperatureModePhase && temperature < minTemperature) || (isTemperatureModeStartedNow && temperature < maxTemperature)) {
       temperatureModePhase = true;  // переходим в 2 фазу
@@ -391,17 +443,17 @@ public:
         digitalWrite(heatingElementsRelayPin, HIGH);
       }
       digitalWrite(heatingRelayPin, HIGH);
-      temperatureRangeNotChanged = true;
       Serial.println("Котёл запущен по температуре");
-      if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/temperatureMode").c_str(), temperatureMode.substring(0, temperatureMode.length() - 1) + "1"))
+
+      if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/temperatureMode").c_str(), temperatureMode + "11"))
         Serial.println("Не удалось записать в Firebase то, что котёл запущен :( Причина: " + String(firebaseData.errorReason().c_str()));
       // если режим по температуре в 2 фазе и текущая температура выше максимальной
     } else if (temperatureModePhase && temperature >= maxTemperature) {
       temperatureModePhase = false;  // переходим в 1 фазу
       digitalWrite(heatingRelayPin, LOW);
-      temperatureRangeNotChanged = true;
       Serial.println("Котёл остановлен по температуре");
-      if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/temperatureMode").c_str(), temperatureMode.substring(0, temperatureMode.length() - 1) + "0"))
+
+      if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/temperatureMode").c_str(), temperatureMode + "01"))
         Serial.println("Не удалось записать в Firebase то, что котёл остановлен :( Причина: " + String(firebaseData.errorReason().c_str()));
     }
     isTemperatureModeStartedNow = false;

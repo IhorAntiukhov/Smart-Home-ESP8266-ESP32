@@ -31,19 +31,20 @@ import kotlin.collections.ArrayList
 
 class HeaterTimeFragment : Fragment() {
     private lateinit var binding: FragmentHeaterTimeBinding
+    private lateinit var recyclerAdapter: TimeRecyclerAdapter
     private lateinit var gson: Gson
     private var timestampsArrayList = ArrayList<HeatingOrBoilerTimestamp>()
+    private var isTimeModeStarted = false
+    private var clockFormat = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
         with(binding) {
-            var heaterOnOffTime = false
-            val isTimeModeStarted = sharedPreferences.getBoolean("isHeaterTimeModeStarted", false)
+            isTimeModeStarted = sharedPreferences.getBoolean("isHeaterTimeModeStarted", false)
 
             val isSystem24Hour = DateFormat.is24HourFormat(requireActivity())
-            val clockFormat = if (isSystem24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
-            val calendar = Calendar.getInstance()
+            clockFormat = if (isSystem24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
 
             gson = Gson()
             if (isTimeModeStarted) {
@@ -55,7 +56,8 @@ class HeaterTimeFragment : Fragment() {
             if (sharedPreferences.getString("HeaterTimestampsArrayList", "") != "")
                 timestampsArrayList = gson.fromJson(sharedPreferences.getString("HeaterTimestampsArrayList", ""), object : TypeToken<ArrayList<HeatingOrBoilerTimestamp?>?>() {}.type)
 
-            val recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
+            recyclerAdapter = TimeRecyclerAdapter(timestampsArrayList)
+            recyclerAdapter.setOnItemClickListener(recyclerAdapterClickListener)
             recyclerView.apply {
                 adapter = recyclerAdapter
                 layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -72,7 +74,7 @@ class HeaterTimeFragment : Fragment() {
                             timestampsString += it.time.replace(":", "")
                         }
 
-                        if (time != " " && !isTimeModeStarted) {
+                        if (time != " ") {
                             timestampsArrayList.clear()
                             var onOffTime = false
                             var i = 0
@@ -85,6 +87,7 @@ class HeaterTimeFragment : Fragment() {
                             }
                             recyclerAdapter.notifyDataSetChanged()
 
+                            isTimeModeStarted = true
                             editPreferences.putBoolean("isHeaterTimeModeStarted", true)
                             editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
 
@@ -92,25 +95,12 @@ class HeaterTimeFragment : Fragment() {
                             buttonStartTimeMode.visibility = View.GONE
                             buttonStopTimeMode.visibility = View.VISIBLE
                             buttonStopTimeMode.alpha = 1f
-                        } else if (time == " " && isTimeModeStarted) {
+                        } else {
                             buttonStopTimeMode.visibility = View.GONE
                             layoutTime.visibility = View.VISIBLE
                             buttonStartTimeMode.visibility = View.VISIBLE
+                            isTimeModeStarted = false
                             editPreferences.putBoolean("isHeaterTimeModeStarted", false).apply()
-                        } else if (timestampsString != time && isTimeModeStarted) {
-                            timestampsArrayList.clear()
-                            var onOffTime = false
-                            var i = 0
-                            while (i < time.length) {
-                                onOffTime = !onOffTime
-                                timestampsArrayList.add(HeatingOrBoilerTimestamp(time.substring(i, i + 2) +
-                                        ":" + time.substring(i + 2, i + 4),
-                                    onOffTime, 0))
-                                i += 4
-                            }
-                            recyclerAdapter.notifyDataSetChanged()
-
-                            editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
                         }
                     }
 
@@ -118,21 +108,9 @@ class HeaterTimeFragment : Fragment() {
 
                 })
 
-            buttonDeleteTime.setOnClickListener {
-                vibrate()
-                if (timestampsArrayList.size >= 1) {
-                    val timestampsArrayListSize = timestampsArrayList.size
-                    timestampsArrayList.clear()
-                    recyclerAdapter.notifyItemRangeRemoved(0, timestampsArrayListSize)
-                    heaterOnOffTime = false
-                    editPreferences.putString("HeaterTimestampsArrayList", "").apply()
-                } else {
-                    Toast.makeText(requireActivity(), "Добавьте хотя бы\nодно время включения\n/выключения!", Toast.LENGTH_LONG).show()
-                }
-            }
-
             buttonAddTime.setOnClickListener {
                 vibrate()
+                val calendar = Calendar.getInstance()
                 val timePicker = MaterialTimePicker.Builder()
                     .setTimeFormat(clockFormat)
                     .setTitleText("Выберите время")
@@ -142,7 +120,11 @@ class HeaterTimeFragment : Fragment() {
 
                 timePicker.addOnPositiveButtonClickListener {
                     vibrate()
-                    heaterOnOffTime = !heaterOnOffTime
+                    val heaterOnOffTime = if (timestampsArrayList.size > 0) {
+                        !timestampsArrayList[timestampsArrayList.size - 1].onOff
+                    } else {
+                        true
+                    }
                     var hour = timePicker.hour.toString()
                     var minute = timePicker.minute.toString()
                     if (hour.toInt() < 10) {
@@ -153,11 +135,27 @@ class HeaterTimeFragment : Fragment() {
                     }
                     timestampsArrayList.add(HeatingOrBoilerTimestamp("$hour:$minute", heaterOnOffTime, 0))
                     recyclerAdapter.notifyItemInserted(timestampsArrayList.size - 1)
+                    editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
                 }
                 timePicker.addOnNegativeButtonClickListener {
                     vibrate()
                 }
                 timePicker.show(requireActivity().supportFragmentManager, "timePicker")
+            }
+
+            buttonDeleteTime.setOnClickListener {
+                vibrate()
+                if (timestampsArrayList.size >= 1) {
+                    timestampsArrayList.removeAt(timestampsArrayList.size - 1)
+                    recyclerAdapter.notifyItemRemoved(timestampsArrayList.size)
+                    if (timestampsArrayList.size > 0) {
+                        editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+                    } else {
+                        editPreferences.putString("HeaterTimestampsArrayList", "").apply()
+                    }
+                } else {
+                    Toast.makeText(requireActivity(), "Добавьте хотя бы\nодно время включения\n/выключения!", Toast.LENGTH_LONG).show()
+                }
             }
 
             buttonStartTimeMode.setOnClickListener {
@@ -194,6 +192,7 @@ class HeaterTimeFragment : Fragment() {
             buttonStopTimeMode.setOnClickListener {
                 vibrate()
                 if (isNetworkConnected(requireActivity())) {
+                    isTimeModeStarted = false
                     editPreferences.putBoolean("isHeaterTimeModeStarted", false).apply()
 
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("heaterOnOffTime").setValue(" ")
@@ -244,8 +243,8 @@ class HeaterTimeFragment : Fragment() {
             }
             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("Heater").child("heaterOnOffTime").setValue(heaterOnOffTimeNodeValue)
 
-            editPreferences.putBoolean("isHeaterTimeModeStarted", true)
-            editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+            isTimeModeStarted = true
+            editPreferences.putBoolean("isHeaterTimeModeStarted", true).apply()
 
             var isAnimationStarted = true
             layoutTime.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
@@ -271,6 +270,41 @@ class HeaterTimeFragment : Fragment() {
 
                 }).start()
         }
+    }
+
+    private val recyclerAdapterClickListener = object: TimeRecyclerAdapter.OnItemClickListener {
+        override fun onItemClick(position: Int) {
+            if (!isTimeModeStarted) {
+                vibrate()
+                val calendar = Calendar.getInstance()
+                val timePicker = MaterialTimePicker.Builder()
+                    .setTimeFormat(clockFormat)
+                    .setTitleText("Выберите время")
+                    .setHour(calendar.get(Calendar.HOUR_OF_DAY))
+                    .setMinute(calendar.get(Calendar.MINUTE))
+                    .build()
+
+                timePicker.addOnPositiveButtonClickListener {
+                    vibrate()
+                    var hour = timePicker.hour.toString()
+                    var minute = timePicker.minute.toString()
+                    if (hour.toInt() < 10) {
+                        hour = "0$hour"
+                    }
+                    if (minute.toInt() < 10) {
+                        minute = "0$minute"
+                    }
+                    timestampsArrayList[position] = HeatingOrBoilerTimestamp("$hour:$minute", timestampsArrayList[position].onOff, 0)
+                    recyclerAdapter.notifyItemChanged(position)
+                    editPreferences.putString("HeaterTimestampsArrayList", gson.toJson(timestampsArrayList)).apply()
+                }
+                timePicker.addOnNegativeButtonClickListener {
+                    vibrate()
+                }
+                timePicker.show(requireActivity().supportFragmentManager, "timePicker")
+            }
+        }
+
     }
 
     override fun onCreateView(

@@ -101,7 +101,7 @@ class UserProfileFragment : Fragment() {
                                         getString(R.string.text_heating_and_boiler) -> {
                                             val nodesList = listOf("heatingStarted", "heatingElements", "boilerStarted",
                                                 "heatingTimerTime", "boilerTimerTime", "heatingOnOffTime", "timeHeatingElements", "boilerOnOffTime",
-                                                "temperatureMode", "temperature", "settings")
+                                                "temperatureMode", "temperature", "response", "settings")
                                             nodesList.forEach { node ->
                                                 child("HeatingAndBoiler").child(node).removeValue()
                                             }

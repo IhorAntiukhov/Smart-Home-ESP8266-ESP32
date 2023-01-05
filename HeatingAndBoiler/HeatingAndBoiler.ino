@@ -56,12 +56,13 @@ bool boilerOnOff;
 short boilerTimestampId = 0;  // индекс (в строке со всем временем) следующего времени включения/выключения бойлера
 
 String userUID;
-/* переменная-флажок для того, чтобы при записи в Firebase того, что котёл 
-   запущен/остановлен по температуре, слушатель изменения данных не реагировал */
-bool temperatureRangeNotChanged;
 /* переменная для того, чтобы при запуске слушателя изменения данных, не запускался таймер котла,
  или бойлера, не выключался котёл при запуске режима по времени и не сохранялись настройки в SPIFFS */
 bool streamStartedNow = true;
+
+byte sendResponseRequest; // запрос на отправку ответа через Firebase пользователю, который отправил команду
+String response; // ответ, который нужно записать в Firebase
+String responseNode; // узел в Firebase, в который нужно записать ответ
 
 byte hours = 0;
 byte minutes = 0;
@@ -105,12 +106,14 @@ void streamCallback(MultiPathStream stream) {
         isHeatingStarted = true;
         digitalWrite(HEATING_RELAY_PIN, HIGH);
         Serial.println("Котёл запущен");
+        sendResponseRequest = 1;
       }
     } else {
       if (isHeatingStarted) {
         isHeatingStarted = false;
         digitalWrite(HEATING_RELAY_PIN, LOW);
         Serial.println("Котёл остановлен");
+        sendResponseRequest = 1;
       }
     }
   }
@@ -122,12 +125,14 @@ void streamCallback(MultiPathStream stream) {
           heatingTimerMillis = millis();
           digitalWrite(HEATING_RELAY_PIN, HIGH);
           Serial.println("Запущен таймер котла. Время работы таймера: " + String(heatingTimerTime) + " минут");
+          sendResponseRequest = 1;
         }
       } else {
         heatingTimerTime = 0;
         heatingTimerMillis = 0;
         digitalWrite(HEATING_RELAY_PIN, LOW);
         Serial.println("Таймер котла остановлен");
+        sendResponseRequest = 1;
       }
     }
   }
@@ -138,8 +143,8 @@ void streamCallback(MultiPathStream stream) {
     }
   }
   if (stream.get("heatingOnOffTime")) {  // если получено время включения/выключения котла в режиме по времени
-    if (String(stream.value.c_str()) != heatingOnOffTime) {
-      heatingOnOffTime = String(stream.value.c_str());
+    if (String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 1) != heatingOnOffTime) {
+      heatingOnOffTime = String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 1);
       if (heatingOnOffTime != " ") {
         if (!streamStartedNow) digitalWrite(HEATING_RELAY_PIN, LOW);
         short nextTime = 0;
@@ -156,12 +161,19 @@ void streamCallback(MultiPathStream stream) {
           }
           previousNextTime = nextTime;  // записываем следующее время включения/выключения для того, чтобы выйти из цикла если время включения/выключения начнёт уменьшаться
         }
+        if (temperatureMode != " ") {   
+          // если текущее время в диапазоне между временем запуска и временем остановки режима по температуре, запускаем режим       
+          helper.controlTemperatureMode(heatingOnOffTime, timeHeatingElements, heatingTimestampId, isTemperatureModeStartedInTimeMode, isTemperatureModeStartedNow,
+                                        heatingElementsInTemperatureMode, timeModeSettings, boilerOnOff, HEATING_RELAY_PIN, true);
+        } else {
+          // если текущее время в диапазоне между временем включения и временем выключения котла, запускаем котёл
+          helper.controlHeating(heatingOnOffTime, timeHeatingElements, heatingTimestampId, timeModeSettings, HEATING_RELAY_PIN, HEATING_ELEMENTS_RELAY_PIN, boilerOnOff, true);
+        }
         if (heatingTimestampId >= heatingOnOffTime.length() - 1) {
           heatingTimestampId = 0;
         }
         isHeatingStartedFromSPIFFS = false;
         Serial.println("Время включения/выключения котла: " + String(heatingOnOffTime));
-        Serial.println("Режим по времени запущен");
       } else {
         heatingTimestampId = 0;
         timeModeSettings = "H0";
@@ -170,36 +182,45 @@ void streamCallback(MultiPathStream stream) {
         helper.saveToSPIFFS("/TimeMode.txt", "H0" + String(boilerOnOff));
         Serial.println("Режим по времени для котла остановлен");
       }
+
+      sendResponseRequest = 2;
+      response = heatingOnOffTime + "1";
+      responseNode = "heatingOnOffTime";
     }
   }
   if (stream.get("temperatureMode")) {  // если получены настройки режима по температуре
-    if (!temperatureRangeNotChanged) {
-      if (String(stream.value.c_str()) != temperatureMode) {
-        temperatureMode = String(stream.value.c_str());
-        if (String(stream.value.c_str()) != " ") {
-          isTemperatureModeStartedNow = true;
-          minTemperature = (String(stream.value.c_str()).substring(0, String(stream.value.c_str()).indexOf(" "))).toInt();
-          maxTemperature = (String(stream.value.c_str()).substring(String(stream.value.c_str()).indexOf(" ") + 1, 
-                            String(stream.value.c_str()).indexOf(" ", String(stream.value.c_str()).indexOf(" ") + 1))).toInt();
-          digitalWrite(HEATING_RELAY_PIN, LOW);
-          Serial.println("Режим по температуре запущен\nМинимальная температура: " + String(minTemperature) + "°C\nМаксимальная температура: " + String(maxTemperature) + "°C");
-          if (String(stream.value.c_str()).substring(String(stream.value.c_str()).length() - 1, String(stream.value.c_str()).length()) == "1") {
-            digitalWrite(HEATING_ELEMENTS_RELAY_PIN, LOW);
-            Serial.println("Установлен 1 тэн");
-          } else {
-            digitalWrite(HEATING_ELEMENTS_RELAY_PIN, HIGH);
-            Serial.println("Установлено 2 тэна");
-          }
+    if (String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 2) != temperatureMode) {
+      temperatureMode = String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 2);
+      if (temperatureMode != " ") {
+        isTemperatureModeStartedNow = true;
+        minTemperature = (temperatureMode.substring(0, temperatureMode.indexOf(" "))).toInt();
+        maxTemperature = (temperatureMode.substring(temperatureMode.indexOf(" ") + 1, temperatureMode.indexOf(" ", temperatureMode.indexOf(" ") + 1))).toInt();
+        Serial.println("Минимальная температура: " + String(minTemperature) + "°C Максимальная температура: " + String(maxTemperature) + "°C");
+
+        digitalWrite(HEATING_RELAY_PIN, LOW);
+        if (temperatureMode.charAt(temperatureMode.length() - 1) == '1') {
+          digitalWrite(HEATING_ELEMENTS_RELAY_PIN, LOW);
+          Serial.println("Установлен 1 тэн");
         } else {
-          minTemperature = 0;
-          maxTemperature = 0;
-          temperatureModePhase = false;
-          digitalWrite(HEATING_RELAY_PIN, LOW);
-          Serial.println("Режим по температуре остановлен");
+          digitalWrite(HEATING_ELEMENTS_RELAY_PIN, HIGH);
+          Serial.println("Установлено 2 тэна");
         }
+
+        if (heatingOnOffTime != " ") {
+          helper.controlTemperatureMode(heatingOnOffTime, timeHeatingElements, heatingTimestampId, isTemperatureModeStartedInTimeMode, isTemperatureModeStartedNow,
+                                        heatingElementsInTemperatureMode, timeModeSettings, boilerOnOff, HEATING_RELAY_PIN, true);
+        }
+      } else {
+        minTemperature = 0;
+        maxTemperature = 0;
+        temperatureModePhase = false;
+        digitalWrite(HEATING_RELAY_PIN, LOW);
+        Serial.println("Режим по температуре остановлен");
       }
-    } else {
-      temperatureRangeNotChanged = false;
+
+      sendResponseRequest = 2;
+      response = temperatureMode + "01";
+      responseNode = "temperatureMode";
     }
   }
   if (stream.get("temperature")) {  // если получена температура от термометра
@@ -214,12 +235,14 @@ void streamCallback(MultiPathStream stream) {
         isBoilerStarted = true;
         digitalWrite(BOILER_RELAY_PIN, HIGH);
         Serial.println("Бойлер запущен");
+        sendResponseRequest = 1;
       }
     } else {
       if (isBoilerStarted) {
         isBoilerStarted = false;
         digitalWrite(BOILER_RELAY_PIN, LOW);
         Serial.println("Бойлер остановлен");
+        sendResponseRequest = 1;
       }
     }
   }
@@ -231,17 +254,19 @@ void streamCallback(MultiPathStream stream) {
           boilerTimerMillis = millis();
           digitalWrite(BOILER_RELAY_PIN, HIGH);
           Serial.println("Запущен таймер бойлера. Время работы таймера: " + String(boilerTimerTime) + " минут");
+          sendResponseRequest = 1;
         }
       } else {
         boilerTimerMillis = 0;
         digitalWrite(BOILER_RELAY_PIN, LOW);
         Serial.println("Таймер бойлера остановлен");
+        sendResponseRequest = 1;
       }
     }
   }
   if (stream.get("boilerOnOffTime")) {  // если получено время включения/выключения бойлера в режиме по времени
-    if (String(stream.value.c_str()) != boilerOnOffTime) {
-      boilerOnOffTime = String(stream.value.c_str());
+    if (String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 1) != boilerOnOffTime) {
+      boilerOnOffTime = String(stream.value.c_str()).substring(0, String(stream.value.c_str()).length() - 1);
       if (boilerOnOffTime != " ") {
         short nextTime = 0;
         short previousLastTime = 0;
@@ -257,11 +282,12 @@ void streamCallback(MultiPathStream stream) {
           }
           previousLastTime = nextTime;  // записываем следующее время включения/выключения для того, чтобы выйти из цикла если время включения/выключения начнёт уменьшаться
         }
+        // если текущее время в диапазоне между временем включения и временем выключения бойлера, запускаем бойлера
+        helper.controlBoiler(boilerOnOffTime, boilerOnOff, boilerTimestampId, timeModeSettings, BOILER_RELAY_PIN);
         if (boilerTimestampId >= boilerOnOffTime.length() - 1) {
           boilerTimestampId = 0;
         }
         Serial.println("Время включения/выключения бойлера: " + String(boilerOnOffTime));
-        Serial.println("Режим по времени запущен");
       } else {
         boilerOnOff = false;
         boilerTimestampId = 0;
@@ -269,6 +295,10 @@ void streamCallback(MultiPathStream stream) {
         helper.saveToSPIFFS("/TimeMode.txt", timeModeSettings + "0");
         Serial.println("Режим по времени для бойлера остановлен");
       }
+
+      sendResponseRequest = 2;
+      response = boilerOnOffTime + "1";
+      responseNode = "boilerOnOffTime";
     }
   }
   if (stream.get("settings")) {  // если получены настройки
@@ -276,11 +306,10 @@ void streamCallback(MultiPathStream stream) {
       settings = String(stream.value.c_str());
       Serial.println("Настройки: " + String(settings));
       if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/settings").c_str(), " "))
-          Serial.println("Не удалось удалить настройки из Firebase :( Причина: " + String(firebaseData.errorReason().c_str()));
+        Serial.println("Не удалось удалить настройки из Firebase :( Причина: " + String(firebaseData.errorReason().c_str()));
       if (helper.saveToSPIFFS("/Settings.txt", settings)) ESP.restart();
     }
   }
-
   streamStartedNow = false;
 }
 
@@ -362,6 +391,15 @@ void loop() {
     server.handleClient();
   } else {
     if (!timeNotReceivedCorrectly) {  // если время от NTP сервера получено правильно
+      if (sendResponseRequest == 1) {
+        if (!Firebase.RTDB.setBool(&firebaseData, (userUID + "/HeatingAndBoiler/response").c_str(), true))
+          Serial.println("Не удалось записать ответ в Firebase :( Причина: " + String(firebaseData.errorReason().c_str()));
+      } else if (sendResponseRequest == 2) {
+        if (!Firebase.RTDB.setString(&firebaseData, (userUID + "/HeatingAndBoiler/" + responseNode).c_str(), response))
+          Serial.println("Не удалось записать ответ в Firebase :( Причина: " + String(firebaseData.errorReason().c_str()));
+      }
+      sendResponseRequest = 0;
+
       if (heatingTimerTime != 0) {
         helper.startHeatingTimer(heatingTimerMillis, heatingTimerTime, HEATING_RELAY_PIN, firebaseData, userUID);
       }
@@ -394,10 +432,10 @@ void loop() {
       if (temperatureMode != " ") {                                           // если запущен режим по температуре
         if (isTemperatureModeStartedInTimeMode && heatingOnOffTime != " ") {  // если режим управления котлом по температуре запущен по времени
           helper.controlHeatingInTemperatureMode(temperature, minTemperature, maxTemperature, temperatureMode, temperatureModePhase, isTemperatureModeStartedNow,
-                                                 heatingElementsInTemperatureMode, HEATING_RELAY_PIN, HEATING_ELEMENTS_RELAY_PIN, firebaseData, userUID, temperatureRangeNotChanged);
+                                                 heatingElementsInTemperatureMode, HEATING_RELAY_PIN, HEATING_ELEMENTS_RELAY_PIN, firebaseData, userUID);
         } else if (heatingOnOffTime == " ") {  // если одновременно с режимом по температуре не запущен режим по времени
           helper.controlHeatingInTemperatureMode(temperature, minTemperature, maxTemperature, temperatureMode, temperatureModePhase, isTemperatureModeStartedNow,
-                                                 0, HEATING_RELAY_PIN, HEATING_ELEMENTS_RELAY_PIN, firebaseData, userUID, temperatureRangeNotChanged);
+                                                 0, HEATING_RELAY_PIN, HEATING_ELEMENTS_RELAY_PIN, firebaseData, userUID);
         }
       }
     } else {

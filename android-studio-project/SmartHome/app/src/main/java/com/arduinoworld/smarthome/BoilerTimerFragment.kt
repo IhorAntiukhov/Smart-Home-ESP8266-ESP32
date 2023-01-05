@@ -3,10 +3,7 @@ package com.arduinoworld.smarthome
 import android.animation.Animator
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
-import android.os.Build
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.os.VibrationEffect
+import android.os.*
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
@@ -33,10 +30,12 @@ import java.util.*
 class BoilerTimerFragment : Fragment() {
     private lateinit var binding: FragmentBoilerTimerBinding
     private lateinit var countDownTimer: CountDownTimer
-    private lateinit var mediaPlayer: MediaPlayer
     private lateinit var dateFormat: SimpleDateFormat
+    private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var responseValueEventListener: ValueEventListener
     private var isTimerStarted = false
     private var timerDays = 0
+    private var response = false
 
     @SuppressLint("DiscouragedPrivateApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,52 +166,89 @@ class BoilerTimerFragment : Fragment() {
                                     && sharedPreferences.getBoolean("isMaxHeatingElementsStartInTimeMode", false)) || (sharedPreferences.getBoolean("isHeatingTemperatureModeStarted", false)
                                     && sharedPreferences.getInt("TemperatureModeHeatingElements", 1) == maxHeatingElements)))) {
                             if (!(numberPickerDays.value == 0 && numberPickerHours.value == 0 && numberPickerMinutes.value == 0)) {
-                                isTimerStarted = true
-                                timerDays = numberPickerDays.value
-                                if (timerDays >= 1) {
-                                    startTimer((numberPickerDays.value.toLong() * 24 * 60 + numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 60000)
-                                } else {
-                                    startTimer((numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 1000)
-                                }
-
-                                editPreferences.putInt("BoilerNumberPickerDays", numberPickerDays.value)
-                                editPreferences.putInt("BoilerNumberPickerHours", numberPickerHours.value)
-                                editPreferences.putInt("BoilerNumberPickerMinutes", numberPickerMinutes.value)
-                                editPreferences.putBoolean("isBoilerTimerStarted", true).apply()
-
                                 realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerTimerTime").setValue(
                                     numberPickerDays.value * 24 * 60 + numberPickerHours.value * 60 + numberPickerMinutes.value)
 
-                                var isAnimationStarted = true
-                                layoutNumberPickers.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
-                                buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                                buttonStartBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                                    .setListener(object: Animator.AnimatorListener {
-                                        override fun onAnimationStart(animation: Animator) {}
+                                textResponse.visibility = View.VISIBLE
+                                textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                                textResponse.text = getString(R.string.waiting_for_response_text)
+                                
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    if (!response) {
+                                        textResponse.text = getString(R.string.response_not_received_text)
 
-                                        override fun onAnimationEnd(animation: Animator) {
-                                            if (isAnimationStarted) {
-                                                isAnimationStarted = false
+                                        realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                            .removeEventListener(responseValueEventListener)
+                                        realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerTimerTime").setValue(0)
+                                    }
+                                }, 5000)
+                                
+                                responseValueEventListener = object: ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.getValue(Boolean::class.java) != null) {
+                                            response = snapshot.getValue(Boolean::class.java)!!
+                                            if (response) {
+                                                binding.textResponse.text = getString(R.string.response_received_text)
+                                                Handler(Looper.getMainLooper()).postDelayed({
+                                                    textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                                }, 3000)
+                                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                                    .removeEventListener(responseValueEventListener)
 
-                                                layoutNumberPickers.visibility = View.GONE
-                                                buttonStartTimer.visibility = View.GONE
-                                                buttonStartBoiler.visibility = View.GONE
+                                                isTimerStarted = true
+                                                timerDays = numberPickerDays.value
+                                                if (timerDays >= 1) {
+                                                    startTimer((numberPickerDays.value.toLong() * 24 * 60 + numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 60000)
+                                                } else {
+                                                    startTimer((numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 1000)
+                                                }
 
-                                                layoutTimeLeft.visibility = View.VISIBLE
-                                                buttonStopTimer.visibility = View.VISIBLE
+                                                editPreferences.putInt("BoilerNumberPickerDays", numberPickerDays.value)
+                                                editPreferences.putInt("BoilerNumberPickerHours", numberPickerHours.value)
+                                                editPreferences.putInt("BoilerNumberPickerMinutes", numberPickerMinutes.value)
+                                                editPreferences.putBoolean("isBoilerTimerStarted", true).apply()
 
-                                                layoutTimeLeft.translationX = 1100f
-                                                buttonStopTimer.translationX = 1100f
+                                                var isAnimationStarted = true
+                                                layoutNumberPickers.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
+                                                buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                                buttonStartBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                                    .setListener(object: Animator.AnimatorListener {
+                                                        override fun onAnimationStart(animation: Animator) {}
 
-                                                layoutTimeLeft.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                                buttonStopTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                        override fun onAnimationEnd(animation: Animator) {
+                                                            if (isAnimationStarted) {
+                                                                isAnimationStarted = false
+
+                                                                layoutNumberPickers.visibility = View.GONE
+                                                                buttonStartTimer.visibility = View.GONE
+                                                                buttonStartBoiler.visibility = View.GONE
+
+                                                                layoutTimeLeft.visibility = View.VISIBLE
+                                                                buttonStopTimer.visibility = View.VISIBLE
+
+                                                                layoutTimeLeft.translationX = 1100f
+                                                                buttonStopTimer.translationX = 1100f
+
+                                                                layoutTimeLeft.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                                buttonStopTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                            }
+                                                        }
+
+                                                        override fun onAnimationCancel(animation: Animator) {}
+                                                        override fun onAnimationRepeat(animation: Animator) {}
+
+                                                    }).start()
                                             }
                                         }
+                                    }
 
-                                        override fun onAnimationCancel(animation: Animator) {}
-                                        override fun onAnimationRepeat(animation: Animator) {}
+                                    override fun onCancelled(error: DatabaseError) {}
 
-                                    }).start()
+                                }
+
+                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                    .addValueEventListener(responseValueEventListener)
                             } else {
                                 Toast.makeText(requireActivity(), "Установите время\nработы таймера!", Toast.LENGTH_LONG).show()
                             }
@@ -238,50 +274,87 @@ class BoilerTimerFragment : Fragment() {
             buttonStopTimer.setOnClickListener {
                 vibrate()
                 if (isNetworkConnected(requireActivity())) {
-                    isTimerStarted = false
-                    countDownTimer.cancel()
-
-                    editPreferences.remove("BoilerNumberPickerDays")
-                    editPreferences.remove("BoilerNumberPickerHours")
-                    editPreferences.remove("BoilerNumberPickerMinutes")
-                    editPreferences.putBoolean("isBoilerTimerStarted", false).commit()
-
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerTimerTime").setValue(0)
 
-                    var isAnimationStarted = true
-                    layoutTimeLeft.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                    buttonStopTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                        .setListener(object: Animator.AnimatorListener {
-                            override fun onAnimationStart(animation: Animator) {}
+                    textResponse.visibility = View.VISIBLE
+                    textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                    textResponse.text = getString(R.string.waiting_for_response_text)
 
-                            override fun onAnimationEnd(animation: Animator) {
-                                if (isAnimationStarted) {
-                                    isAnimationStarted = false
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!response) {
+                            textResponse.text = getString(R.string.response_not_received_text)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .removeEventListener(responseValueEventListener)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerTimerTime").setValue(
+                                numberPickerDays.value * 24 * 60 + numberPickerHours.value * 60 + numberPickerMinutes.value)
+                        }
+                    }, 5000)
 
-                                    layoutTimeLeft.visibility = View.GONE
-                                    buttonStopTimer.visibility = View.GONE
+                    responseValueEventListener = object: ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.getValue(Boolean::class.java) != null) {
+                                response = snapshot.getValue(Boolean::class.java)!!
+                                if (response) {
+                                    binding.textResponse.text = getString(R.string.response_received_text)
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                    }, 3000)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
 
-                                    layoutNumberPickers.visibility = View.VISIBLE
-                                    buttonStartTimer.visibility = View.VISIBLE
-                                    buttonStartBoiler.visibility = View.VISIBLE
+                                    isTimerStarted = false
+                                    countDownTimer.cancel()
 
-                                    buttonStartTimer.translationX = 1100f
-                                    buttonStartBoiler.translationX = 1100f
+                                    editPreferences.remove("BoilerNumberPickerDays")
+                                    editPreferences.remove("BoilerNumberPickerHours")
+                                    editPreferences.remove("BoilerNumberPickerMinutes")
+                                    editPreferences.putBoolean("isBoilerTimerStarted", false).commit()
 
-                                    layoutNumberPickers.alpha = 0f
-                                    buttonStartTimer.alpha = 0f
-                                    buttonStartBoiler.alpha = 0f
+                                    var isAnimationStarted = true
+                                    layoutTimeLeft.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                    buttonStopTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                        .setListener(object: Animator.AnimatorListener {
+                                            override fun onAnimationStart(animation: Animator) {}
 
-                                    layoutNumberPickers.animate().alpha(1f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                            override fun onAnimationEnd(animation: Animator) {
+                                                if (isAnimationStarted) {
+                                                    isAnimationStarted = false
+
+                                                    layoutTimeLeft.visibility = View.GONE
+                                                    buttonStopTimer.visibility = View.GONE
+
+                                                    layoutNumberPickers.visibility = View.VISIBLE
+                                                    buttonStartTimer.visibility = View.VISIBLE
+                                                    buttonStartBoiler.visibility = View.VISIBLE
+
+                                                    buttonStartTimer.translationX = 1100f
+                                                    buttonStartBoiler.translationX = 1100f
+
+                                                    layoutNumberPickers.alpha = 0f
+                                                    buttonStartTimer.alpha = 0f
+                                                    buttonStartBoiler.alpha = 0f
+
+                                                    layoutNumberPickers.animate().alpha(1f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                }
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator) {}
+                                            override fun onAnimationRepeat(animation: Animator) {}
+
+                                        }).start()
                                 }
                             }
+                        }
 
-                            override fun onAnimationCancel(animation: Animator) {}
-                            override fun onAnimationRepeat(animation: Animator) {}
+                        override fun onCancelled(error: DatabaseError) {}
 
-                        }).start()
+                    }
+                    
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                        .addValueEventListener(responseValueEventListener)
                 } else {
                     Toast.makeText(requireActivity(), "Нет подключения\nк Интернету!", Toast.LENGTH_LONG).show()
                 }
@@ -295,34 +368,70 @@ class BoilerTimerFragment : Fragment() {
                                     && sharedPreferences.getInt("TimerHeatingElements", 1) == maxHeatingElements) || (sharedPreferences.getBoolean("isHeatingTimeModeStarted", false)
                                     && sharedPreferences.getBoolean("isMaxHeatingElementsStartInTimeMode", false)) || (sharedPreferences.getBoolean("isHeatingTemperatureModeStarted", false)
                                     && sharedPreferences.getInt("TemperatureModeHeatingElements", 1) == maxHeatingElements)))) {
-                            isBoilerStarted = true
-                            editPreferences.putBoolean("isBoilerStarted", true).apply()
-
                             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerStarted").setValue(true)
+                            
+                            textResponse.visibility = View.VISIBLE
+                            textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                            textResponse.text = getString(R.string.waiting_for_response_text)
 
-                            var isAnimationStarted = true
-                            buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                            buttonStartBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                                .setListener(object: Animator.AnimatorListener {
-                                    override fun onAnimationStart(animation: Animator) {}
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                if (!response) {
+                                    textResponse.text = getString(R.string.response_not_received_text)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerStarted").setValue(false)
+                                }
+                            }, 5000)
 
-                                    override fun onAnimationEnd(animation: Animator) {
-                                        if (isAnimationStarted) {
-                                            isAnimationStarted = false
+                            responseValueEventListener = object: ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.getValue(Boolean::class.java) != null) {
+                                        response = snapshot.getValue(Boolean::class.java)!!
+                                        if (response) {
+                                            binding.textResponse.text = getString(R.string.response_received_text)
+                                            Handler(Looper.getMainLooper()).postDelayed({
+                                                textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                            }, 3000)
+                                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                                .removeEventListener(responseValueEventListener)
 
-                                            buttonStartTimer.visibility = View.GONE
-                                            buttonStartBoiler.visibility = View.GONE
-                                            buttonStopBoiler.visibility = View.VISIBLE
+                                            isBoilerStarted = true
+                                            editPreferences.putBoolean("isBoilerStarted", true).apply()
 
-                                            buttonStopBoiler.translationX = 1100f
-                                            buttonStopBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                            var isAnimationStarted = true
+                                            buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                            buttonStartBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                                .setListener(object: Animator.AnimatorListener {
+                                                    override fun onAnimationStart(animation: Animator) {}
+
+                                                    override fun onAnimationEnd(animation: Animator) {
+                                                        if (isAnimationStarted) {
+                                                            isAnimationStarted = false
+
+                                                            buttonStartTimer.visibility = View.GONE
+                                                            buttonStartBoiler.visibility = View.GONE
+                                                            buttonStopBoiler.visibility = View.VISIBLE
+
+                                                            buttonStopBoiler.translationX = 1100f
+                                                            buttonStopBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                        }
+                                                    }
+
+                                                    override fun onAnimationCancel(animation: Animator) {}
+                                                    override fun onAnimationRepeat(animation: Animator) {}
+
+                                                }).start()
                                         }
                                     }
+                                }
 
-                                    override fun onAnimationCancel(animation: Animator) {}
-                                    override fun onAnimationRepeat(animation: Animator) {}
+                                override fun onCancelled(error: DatabaseError) {}
 
-                                }).start()
+                            }
+
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .addValueEventListener(responseValueEventListener)
                         } else {
                             if (sharedPreferences.getBoolean("isHeatingStarted", false) && sharedPreferences.getInt("TimerHeatingElements", 1) == maxHeatingElements) {
                                 showOverCurrentProtectionAlertDialog("Так как сейчас запущен котёл, для избежания перегрузки электросети по току, вы не можете запустить бойлер. Вы можете отключить эту функцию в настройках.")
@@ -345,39 +454,75 @@ class BoilerTimerFragment : Fragment() {
             buttonStopBoiler.setOnClickListener {
                 vibrate()
                 if (isNetworkConnected(requireActivity())) {
-                    isBoilerStarted = false
-                    editPreferences.putBoolean("isBoilerStarted", false).apply()
-
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerStarted").setValue(false)
 
-                    var isAnimationStarted = true
-                    buttonStopBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0)
-                        .setListener(object: Animator.AnimatorListener {
-                            override fun onAnimationStart(animation: Animator) {}
+                    textResponse.visibility = View.VISIBLE
+                    textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                    textResponse.text = getString(R.string.waiting_for_response_text)
 
-                            override fun onAnimationEnd(animation: Animator) {
-                                if (isAnimationStarted) {
-                                    isAnimationStarted = false
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!response) {
+                            textResponse.text = getString(R.string.response_not_received_text)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .removeEventListener(responseValueEventListener)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("boilerStarted").setValue(true)
+                        }
+                    }, 5000)
 
-                                    buttonStopBoiler.visibility = View.GONE
-                                    buttonStartTimer.visibility = View.VISIBLE
-                                    buttonStartBoiler.visibility = View.VISIBLE
+                    responseValueEventListener = object: ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.getValue(Boolean::class.java) != null) {
+                                response = snapshot.getValue(Boolean::class.java)!!
+                                if (response) {
+                                    binding.textResponse.text = getString(R.string.response_received_text)
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                    }, 3000)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
 
-                                    buttonStartTimer.translationX = 1100f
-                                    buttonStartBoiler.translationX = 1100f
+                                    isBoilerStarted = false
+                                    editPreferences.putBoolean("isBoilerStarted", false).apply()
 
-                                    buttonStartTimer.alpha = 0f
-                                    buttonStartBoiler.alpha = 0f
+                                    var isAnimationStarted = true
+                                    buttonStopBoiler.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0)
+                                        .setListener(object: Animator.AnimatorListener {
+                                            override fun onAnimationStart(animation: Animator) {}
 
-                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                            override fun onAnimationEnd(animation: Animator) {
+                                                if (isAnimationStarted) {
+                                                    isAnimationStarted = false
+
+                                                    buttonStopBoiler.visibility = View.GONE
+                                                    buttonStartTimer.visibility = View.VISIBLE
+                                                    buttonStartBoiler.visibility = View.VISIBLE
+
+                                                    buttonStartTimer.translationX = 1100f
+                                                    buttonStartBoiler.translationX = 1100f
+
+                                                    buttonStartTimer.alpha = 0f
+                                                    buttonStartBoiler.alpha = 0f
+
+                                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartBoiler.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                }
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator) {}
+                                            override fun onAnimationRepeat(animation: Animator) {}
+
+                                        }).start()
                                 }
                             }
+                        }
 
-                            override fun onAnimationCancel(animation: Animator) {}
-                            override fun onAnimationRepeat(animation: Animator) {}
+                        override fun onCancelled(error: DatabaseError) {}
 
-                        }).start()
+                    }
+
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                        .addValueEventListener(responseValueEventListener)
                 } else {
                     Toast.makeText(requireActivity(), "Нет подключения\nк Интернету!", Toast.LENGTH_LONG).show()
                 }

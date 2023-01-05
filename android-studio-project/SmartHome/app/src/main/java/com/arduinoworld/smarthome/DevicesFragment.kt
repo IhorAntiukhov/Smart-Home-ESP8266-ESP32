@@ -49,7 +49,7 @@ class DevicesFragment : Fragment() {
 
     private val heatingAndBoilerNodesList = listOf("heatingStarted", "heatingElements", "boilerStarted",
         "heatingTimerTime", "boilerTimerTime", "heatingOnOffTime", "timeHeatingElements", "boilerOnOffTime",
-        "temperatureMode", "temperature", "settings")
+        "temperatureMode", "temperature", "response", "settings")
     private val smartRemotesNodesList = listOf("lightRemoteButton", "tvRemoteButton",
         "acRemote", "acOnOffTime", "rgbRemoteButton", "settings")
     private val heaterNodesList = listOf("heaterStarted", "temperatureMode", "temperature", "heaterOnOffTime", "settings")
@@ -808,7 +808,7 @@ class DevicesFragment : Fragment() {
                                 child("WiFiThermometer").child("batteryLevel").setValue(0)
                             }
                             1 -> {
-                                val nodeValuesList = listOf(false, 1, false, 0, 0, " ", " ", " ", " ", 0, " ")
+                                val nodeValuesList = listOf(false, 1, false, 0, 0, " 0", " ", " 0", " 00", 0, false, " ")
                                 heatingAndBoilerNodesList.forEach {
                                     child("HeatingAndBoiler").child(it).setValue(nodeValuesList[heatingAndBoilerNodesList.indexOf(it)])
                                 }

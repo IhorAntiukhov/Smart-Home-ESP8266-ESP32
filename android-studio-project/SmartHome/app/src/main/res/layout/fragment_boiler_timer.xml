@@ -1,289 +1,328 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scrollbarThumbVertical="@drawable/scrollbar_style"
-    tools:context=".HeatingTimerFragment">
+    tools:context=".BoilerTimerFragment">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_above="@+id/layoutResponse"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="16dp"
+        android:scrollbarThumbVertical="@drawable/scrollbar_style">
 
         <LinearLayout
-            android:id="@+id/layoutNumberPickers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="45dp"
-            android:layout_marginEnd="35dp"
-            android:orientation="horizontal"
-            android:weightSum="3">
+            android:orientation="vertical">
 
-            <NumberPicker
-                android:id="@+id/numberPickerDays"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/layoutNumberPickers"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:theme="@style/NumberPickerStyle"
-                android:scrollbarThumbVertical="@android:color/transparent">
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="45dp"
+                android:layout_marginEnd="35dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
 
-            </NumberPicker>
+                <NumberPicker
+                    android:id="@+id/numberPickerDays"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scrollbarThumbVertical="@android:color/transparent"
+                    android:theme="@style/NumberPickerStyle">
 
-            <NumberPicker
-                android:id="@+id/numberPickerHours"
-                android:layout_width="0dp"
+                </NumberPicker>
+
+                <NumberPicker
+                    android:id="@+id/numberPickerHours"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_weight="1"
+                    android:scrollbarThumbVertical="@android:color/transparent"
+                    android:theme="@style/NumberPickerStyle">
+
+                </NumberPicker>
+
+                <NumberPicker
+                    android:id="@+id/numberPickerMinutes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scrollbarThumbVertical="@android:color/transparent"
+                    android:theme="@style/NumberPickerStyle">
+
+                </NumberPicker>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTimeLeft"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_weight="1"
-                android:theme="@style/NumberPickerStyle"
-                android:scrollbarThumbVertical="@android:color/transparent">
+                android:layout_marginStart="29dp"
+                android:layout_marginTop="36dp"
+                android:layout_marginEnd="29dp"
+                android:alpha="0"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="3.2">
 
-            </NumberPicker>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
-            <NumberPicker
-                android:id="@+id/numberPickerMinutes"
-                android:layout_width="0dp"
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        app:cardBackgroundColor="@color/primary_color"
+                        app:cardCornerRadius="20dp"
+                        app:cardUseCompatPadding="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1.0f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:id="@+id/textHours"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="100dp"
+                            app:autoSizeMinTextSize="10dp"
+                            app:autoSizeStepGranularity="0.5dp"
+                            app:autoSizeTextType="uniform" />
+                    </androidx.cardview.widget.CardView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.1"
+                    android:gravity="center"
+                    android:paddingBottom="10dp"
+                    android:text="@string/text_colon"
+                    android:textColor="@color/primary_color"
+                    android:textSize="55sp"
+                    android:textStyle="bold" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        app:cardBackgroundColor="@color/primary_color"
+                        app:cardCornerRadius="20dp"
+                        app:cardUseCompatPadding="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1.0f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:id="@+id/textMinutes"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="100dp"
+                            app:autoSizeMinTextSize="10dp"
+                            app:autoSizeStepGranularity="0.5dp"
+                            app:autoSizeTextType="uniform" />
+                    </androidx.cardview.widget.CardView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.1"
+                    android:gravity="center"
+                    android:paddingBottom="10dp"
+                    android:text="@string/text_colon"
+                    android:textColor="@color/primary_color"
+                    android:textSize="55sp"
+                    android:textStyle="bold" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        app:cardBackgroundColor="@color/primary_color"
+                        app:cardCornerRadius="20dp"
+                        app:cardUseCompatPadding="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1.0f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:id="@+id/textSeconds"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:autoSizeMaxTextSize="100dp"
+                            app:autoSizeMinTextSize="10dp"
+                            app:autoSizeStepGranularity="0.5dp"
+                            app:autoSizeTextType="uniform" />
+                    </androidx.cardview.widget.CardView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonStartTimer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:theme="@style/NumberPickerStyle"
-                android:scrollbarThumbVertical="@android:color/transparent">
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="35dp"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:text="@string/button_start_timer"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_timer"
+                app:iconPadding="4dp" />
 
-            </NumberPicker>
+            <Button
+                android:id="@+id/buttonStopTimer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:alpha="0"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:text="@string/button_stop_timer"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_timer"
+                app:iconPadding="6dp" />
+
+            <Button
+                android:id="@+id/buttonStartBoiler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:paddingEnd="20dp"
+                android:text="@string/button_start_boiler"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_on_off"
+                app:iconPadding="4dp"
+                tools:ignore="RtlSymmetry" />
+
+            <Button
+                android:id="@+id/buttonStopBoiler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="35dp"
+                android:layout_marginBottom="13dp"
+                android:alpha="0"
+                android:background="@drawable/button_rounded_background"
+                android:maxLines="1"
+                android:paddingEnd="20dp"
+                android:text="@string/button_stop_boiler"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="100dp"
+                app:autoSizeMinTextSize="10dp"
+                app:autoSizeStepGranularity="0.5dp"
+                app:autoSizeTextType="uniform"
+                app:backgroundTint="#FFFFFF"
+                app:backgroundTintMode="multiply"
+                app:icon="@drawable/ic_on_off"
+                tools:ignore="RtlSymmetry" />
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/layoutTimeLeft"
+    </ScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@id/layoutResponse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="35dp"
+        android:layout_marginEnd="35dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/textResponse"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="29dp"
-            android:layout_marginTop="36dp"
-            android:layout_marginEnd="29dp"
+            android:layout_height="0dp"
             android:alpha="0"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            android:weightSum="3.2">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:cardBackgroundColor="@color/primary_color"
-                    app:cardCornerRadius="20dp"
-                    app:cardUseCompatPadding="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1.0f"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/textHours"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        app:autoSizeMaxTextSize="100dp"
-                        app:autoSizeMinTextSize="10dp"
-                        app:autoSizeStepGranularity="0.5dp"
-                        app:autoSizeTextType="uniform" />
-                </androidx.cardview.widget.CardView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1"
-                android:gravity="center"
-                android:paddingBottom="10dp"
-                android:text="@string/text_colon"
-                android:textColor="@color/primary_color"
-                android:textSize="55sp"
-                android:textStyle="bold" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:cardBackgroundColor="@color/primary_color"
-                    app:cardCornerRadius="20dp"
-                    app:cardUseCompatPadding="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1.0f"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/textMinutes"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        app:autoSizeMaxTextSize="100dp"
-                        app:autoSizeMinTextSize="10dp"
-                        app:autoSizeStepGranularity="0.5dp"
-                        app:autoSizeTextType="uniform" />
-                </androidx.cardview.widget.CardView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1"
-                android:gravity="center"
-                android:paddingBottom="10dp"
-                android:text="@string/text_colon"
-                android:textColor="@color/primary_color"
-                android:textSize="55sp"
-                android:textStyle="bold" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:cardBackgroundColor="@color/primary_color"
-                    app:cardCornerRadius="20dp"
-                    app:cardUseCompatPadding="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="1.0f"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/textSeconds"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        app:autoSizeMaxTextSize="100dp"
-                        app:autoSizeMinTextSize="10dp"
-                        app:autoSizeStepGranularity="0.5dp"
-                        app:autoSizeTextType="uniform" />
-                </androidx.cardview.widget.CardView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/buttonStartTimer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="35dp"
-            android:background="@drawable/button_rounded_background"
-            android:maxLines="1"
-            android:text="@string/button_start_timer"
-            android:textStyle="bold"
-            app:autoSizeMaxTextSize="100dp"
-            app:autoSizeMinTextSize="10dp"
-            app:autoSizeStepGranularity="0.5dp"
-            app:autoSizeTextType="uniform"
-            app:backgroundTint="#FFFFFF"
-            app:backgroundTintMode="multiply"
-            app:icon="@drawable/ic_timer"
-            app:iconPadding="4dp" />
-
-        <Button
-            android:id="@+id/buttonStopTimer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="35dp"
-            android:layout_marginBottom="13dp"
-            android:alpha="0"
-            android:background="@drawable/button_rounded_background"
-            android:maxLines="1"
-            android:text="@string/button_stop_timer"
+            android:text="@string/waiting_for_response_text"
+            android:textAlignment="center"
+            android:textColor="@color/primary_color"
             android:textStyle="bold"
             android:visibility="gone"
-            app:autoSizeMaxTextSize="100dp"
-            app:autoSizeMinTextSize="10dp"
-            app:autoSizeStepGranularity="0.5dp"
+            app:autoSizeMaxTextSize="100sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity="0.5sp"
             app:autoSizeTextType="uniform"
-            app:backgroundTint="#FFFFFF"
-            app:backgroundTintMode="multiply"
-            app:icon="@drawable/ic_timer"
-            app:iconPadding="6dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="9.8f"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/buttonStartBoiler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="35dp"
-            android:layout_marginBottom="13dp"
-            android:background="@drawable/button_rounded_background"
-            android:maxLines="1"
-            android:paddingEnd="20dp"
-            android:text="@string/button_start_boiler"
-            android:textStyle="bold"
-            app:autoSizeMaxTextSize="100dp"
-            app:autoSizeMinTextSize="10dp"
-            app:autoSizeStepGranularity="0.5dp"
-            app:autoSizeTextType="uniform"
-            app:backgroundTint="#FFFFFF"
-            app:backgroundTintMode="multiply"
-            app:icon="@drawable/ic_on_off"
-            app:iconPadding="4dp"
-            tools:ignore="RtlSymmetry" />
-
-        <Button
-            android:id="@+id/buttonStopBoiler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="35dp"
-            android:layout_marginBottom="13dp"
-            android:alpha="0"
-            android:background="@drawable/button_rounded_background"
-            android:maxLines="1"
-            android:paddingEnd="20dp"
-            android:text="@string/button_stop_boiler"
-            android:textStyle="bold"
-            android:visibility="gone"
-            app:autoSizeMaxTextSize="100dp"
-            app:autoSizeMinTextSize="10dp"
-            app:autoSizeStepGranularity="0.5dp"
-            app:autoSizeTextType="uniform"
-            app:backgroundTint="#FFFFFF"
-            app:backgroundTintMode="multiply"
-            app:icon="@drawable/ic_on_off"
-            tools:ignore="RtlSymmetry" />
-
-    </LinearLayout>
-
-</ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

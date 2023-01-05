@@ -14,9 +14,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.arduinoworld.smarthome.MainActivity.Companion.editPreferences
 import com.arduinoworld.smarthome.MainActivity.Companion.firebaseAuth
+import com.arduinoworld.smarthome.MainActivity.Companion.isHapticFeedbackEnabled
 import com.arduinoworld.smarthome.MainActivity.Companion.isNetworkConnected
 import com.arduinoworld.smarthome.MainActivity.Companion.realtimeDatabase
 import com.arduinoworld.smarthome.MainActivity.Companion.sharedPreferences
+import com.arduinoworld.smarthome.MainActivity.Companion.vibrator
 import com.arduinoworld.smarthome.databinding.FragmentHeatingTimerBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -30,10 +32,12 @@ class HeatingTimerFragment : Fragment() {
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var dateFormat: SimpleDateFormat
     private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var responseValueEventListener: ValueEventListener
     private var isTimerStarted = false
     private var timerDays = 0
     private var heatingElements = 1
     private var maxHeatingElements = 2
+    private var response = false
 
     @SuppressLint("DiscouragedPrivateApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,9 +47,9 @@ class HeatingTimerFragment : Fragment() {
             mediaPlayer = MediaPlayer.create(requireActivity(), R.raw.notification)
             dateFormat = SimpleDateFormat("dd/M/yyyy hh:mm:ss", Locale.US)
 
+            val isOverCurrentProtectionEnabled = sharedPreferences.getBoolean("isOverCurrentProtectionEnabled", true)
             heatingElements = sharedPreferences.getInt("TimerHeatingElements", 1)
             maxHeatingElements = sharedPreferences.getString("MaxHeatingElements", "2")!!.toInt()
-            val isOverCurrentProtectionEnabled = sharedPreferences.getBoolean("isOverCurrentProtectionEnabled", true)
             var isHeatingStarted = sharedPreferences.getBoolean("isHeatingStarted", false)
             isTimerStarted = sharedPreferences.getBoolean("isHeatingTimerStarted", false)
 
@@ -235,60 +239,97 @@ class HeatingTimerFragment : Fragment() {
                         if (!(isOverCurrentProtectionEnabled && heatingElements == maxHeatingElements && maxHeatingElements > 1 &&
                                     (sharedPreferences.getBoolean("isBoilerStarted", false) || sharedPreferences.getBoolean("isBoilerTimerStarted", false) || sharedPreferences.getBoolean("isBoilerTimeModeStarted", false)))) {
                             if (!(numberPickerDays.value == 0 && numberPickerHours.value == 0 && numberPickerMinutes.value == 0)) {
-                                isTimerStarted = true
-                                timerDays = numberPickerDays.value
-
-                                if (timerDays >= 1) {
-                                    startTimer((numberPickerDays.value.toLong() * 24 * 60 + numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 60000)
-                                } else {
-                                    startTimer((numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 1000)
-                                }
-
-                                editPreferences.putInt("HeatingNumberPickerDays", numberPickerDays.value)
-                                editPreferences.putInt("HeatingNumberPickerHours", numberPickerHours.value)
-                                editPreferences.putInt("HeatingNumberPickerMinutes", numberPickerMinutes.value)
-                                editPreferences.putInt("TimerHeatingElements", heatingElements)
-                                editPreferences.putBoolean("isHeatingTimerStarted", true).apply()
-
                                 realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingElements").setValue(heatingElements)
                                 Handler(Looper.getMainLooper()).postDelayed({
                                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingTimerTime").setValue(
                                         numberPickerDays.value * 24 * 60 + numberPickerHours.value * 60 + numberPickerMinutes.value)
                                 }, 250)
 
-                                buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
-                                buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                                textResponse.visibility = View.VISIBLE
+                                textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                                textResponse.text = getString(R.string.waiting_for_response_text)
 
-                                var isAnimationStarted = true
-                                layoutNumberPickers.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
-                                buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                                buttonStartHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                                    .setListener(object: Animator.AnimatorListener {
-                                        override fun onAnimationStart(animation: Animator) {}
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    if (!response) {
+                                        textResponse.text = getString(R.string.response_not_received_text)
 
-                                        override fun onAnimationEnd(animation: Animator) {
-                                            if (isAnimationStarted) {
-                                                isAnimationStarted = false
+                                        realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                            .removeEventListener(responseValueEventListener)
+                                        realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingTimerTime").setValue(0)
+                                    }
+                                }, 5000)
 
-                                                layoutNumberPickers.visibility = View.GONE
-                                                buttonStartTimer.visibility = View.GONE
-                                                buttonStartHeating.visibility = View.GONE
+                                responseValueEventListener = object: ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.getValue(Boolean::class.java) != null) {
+                                            response = snapshot.getValue(Boolean::class.java)!!
+                                            if (response) {
+                                                binding.textResponse.text = getString(R.string.response_received_text)
+                                                Handler(Looper.getMainLooper()).postDelayed({
+                                                    textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                                }, 3000)
+                                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                                    .removeEventListener(responseValueEventListener)
 
-                                                layoutTimeLeft.visibility = View.VISIBLE
-                                                buttonStopTimer.visibility = View.VISIBLE
+                                                isTimerStarted = true
+                                                timerDays = numberPickerDays.value
 
-                                                layoutTimeLeft.translationX = 1100f
-                                                buttonStopTimer.translationX = 1100f
+                                                if (timerDays >= 1) {
+                                                    startTimer((numberPickerDays.value.toLong() * 24 * 60 + numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 60000)
+                                                } else {
+                                                    startTimer((numberPickerHours.value.toLong() * 60 + numberPickerMinutes.value) * 60 * 1000, 1000)
+                                                }
 
-                                                layoutTimeLeft.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                                buttonStopTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                editPreferences.putInt("HeatingNumberPickerDays", numberPickerDays.value)
+                                                editPreferences.putInt("HeatingNumberPickerHours", numberPickerHours.value)
+                                                editPreferences.putInt("HeatingNumberPickerMinutes", numberPickerMinutes.value)
+                                                editPreferences.putInt("TimerHeatingElements", heatingElements)
+                                                editPreferences.putBoolean("isHeatingTimerStarted", true).apply()
+
+                                                buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
+                                                buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+
+                                                var isAnimationStarted = true
+                                                layoutNumberPickers.animate().alpha(0f).setDuration(500).setStartDelay(0).start()
+                                                buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                                buttonStartHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                                    .setListener(object: Animator.AnimatorListener {
+                                                        override fun onAnimationStart(animation: Animator) {}
+
+                                                        override fun onAnimationEnd(animation: Animator) {
+                                                            if (isAnimationStarted) {
+                                                                isAnimationStarted = false
+
+                                                                layoutNumberPickers.visibility = View.GONE
+                                                                buttonStartTimer.visibility = View.GONE
+                                                                buttonStartHeating.visibility = View.GONE
+
+                                                                layoutTimeLeft.visibility = View.VISIBLE
+                                                                buttonStopTimer.visibility = View.VISIBLE
+
+                                                                layoutTimeLeft.translationX = 1100f
+                                                                buttonStopTimer.translationX = 1100f
+
+                                                                layoutTimeLeft.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                                buttonStopTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                            }
+                                                        }
+
+                                                        override fun onAnimationCancel(animation: Animator) {}
+                                                        override fun onAnimationRepeat(animation: Animator) {}
+
+                                                    }).start()
                                             }
                                         }
+                                    }
 
-                                        override fun onAnimationCancel(animation: Animator) {}
-                                        override fun onAnimationRepeat(animation: Animator) {}
+                                    override fun onCancelled(error: DatabaseError) {}
 
-                                    }).start()
+                                }
+
+                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                                realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                    .addValueEventListener(responseValueEventListener)
                             } else {
                                 Toast.makeText(requireActivity(), "Установите время\nработы таймера!", Toast.LENGTH_LONG).show()
                             }
@@ -318,56 +359,94 @@ class HeatingTimerFragment : Fragment() {
             buttonStopTimer.setOnClickListener {
                 vibrate()
                 if (isNetworkConnected(requireActivity())) {
-                    isTimerStarted = false
-                    countDownTimer.cancel()
-                    editPreferences.putBoolean("isHeatingTimerStarted", false).apply()
-
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingTimerTime").setValue(0)
 
-                    buttonIncrease.setImageResource(R.drawable.ic_increase)
-                    buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                    if (heatingElements == maxHeatingElements) {
-                        buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                        buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
-                    } else if (heatingElements == 1) {
-                        buttonIncrease.setImageResource(R.drawable.ic_increase)
-                        buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
-                    }
+                    textResponse.visibility = View.VISIBLE
+                    textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                    textResponse.text = getString(R.string.waiting_for_response_text)
 
-                    var isAnimationStarted = true
-                    layoutTimeLeft.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                    buttonStopTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                        .setListener(object: Animator.AnimatorListener {
-                            override fun onAnimationStart(animation: Animator) {}
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!response) {
+                            textResponse.text = getString(R.string.response_not_received_text)
 
-                            override fun onAnimationEnd(animation: Animator) {
-                                if (isAnimationStarted) {
-                                    isAnimationStarted = false
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .removeEventListener(responseValueEventListener)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingTimerTime").setValue(
+                                numberPickerDays.value * 24 * 60 + numberPickerHours.value * 60 + numberPickerMinutes.value)
+                        }
+                    }, 5000)
 
-                                    layoutTimeLeft.visibility = View.GONE
-                                    buttonStopTimer.visibility = View.GONE
+                    responseValueEventListener = object: ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.getValue(Boolean::class.java) != null) {
+                                response = snapshot.getValue(Boolean::class.java)!!
+                                if (response) {
+                                    binding.textResponse.text = getString(R.string.response_received_text)
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                    }, 3000)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
 
-                                    layoutNumberPickers.visibility = View.VISIBLE
-                                    buttonStartTimer.visibility = View.VISIBLE
-                                    buttonStartHeating.visibility = View.VISIBLE
+                                    isTimerStarted = false
+                                    countDownTimer.cancel()
+                                    editPreferences.putBoolean("isHeatingTimerStarted", false).apply()
 
-                                    buttonStartTimer.translationX = 1100f
-                                    buttonStartHeating.translationX = 1100f
+                                    buttonIncrease.setImageResource(R.drawable.ic_increase)
+                                    buttonDecrease.setImageResource(R.drawable.ic_decrease)
+                                    if (heatingElements == maxHeatingElements) {
+                                        buttonDecrease.setImageResource(R.drawable.ic_decrease)
+                                        buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
+                                    } else if (heatingElements == 1) {
+                                        buttonIncrease.setImageResource(R.drawable.ic_increase)
+                                        buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                                    }
 
-                                    layoutNumberPickers.alpha = 0f
-                                    buttonStartTimer.alpha = 0f
-                                    buttonStartHeating.alpha = 0f
+                                    var isAnimationStarted = true
+                                    layoutTimeLeft.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                    buttonStopTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                        .setListener(object: Animator.AnimatorListener {
+                                            override fun onAnimationStart(animation: Animator) {}
 
-                                    layoutNumberPickers.animate().alpha(1f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                            override fun onAnimationEnd(animation: Animator) {
+                                                if (isAnimationStarted) {
+                                                    isAnimationStarted = false
+
+                                                    layoutTimeLeft.visibility = View.GONE
+                                                    buttonStopTimer.visibility = View.GONE
+
+                                                    layoutNumberPickers.visibility = View.VISIBLE
+                                                    buttonStartTimer.visibility = View.VISIBLE
+                                                    buttonStartHeating.visibility = View.VISIBLE
+
+                                                    buttonStartTimer.translationX = 1100f
+                                                    buttonStartHeating.translationX = 1100f
+
+                                                    layoutNumberPickers.alpha = 0f
+                                                    buttonStartTimer.alpha = 0f
+                                                    buttonStartHeating.alpha = 0f
+
+                                                    layoutNumberPickers.animate().alpha(1f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                }
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator) {}
+                                            override fun onAnimationRepeat(animation: Animator) {}
+
+                                        }).start()
                                 }
                             }
+                        }
 
-                            override fun onAnimationCancel(animation: Animator) {}
-                            override fun onAnimationRepeat(animation: Animator) {}
+                        override fun onCancelled(error: DatabaseError) {}
 
-                        }).start()
+                    }
+
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                        .addValueEventListener(responseValueEventListener)
                 } else {
                     Toast.makeText(requireActivity(), "Нет подключения\nк Интернету!", Toast.LENGTH_LONG).show()
                 }
@@ -378,40 +457,77 @@ class HeatingTimerFragment : Fragment() {
                 if (isNetworkConnected(requireActivity())) {
                     if (!sharedPreferences.getBoolean("isHeatingTimeModeStarted", false) && !sharedPreferences.getBoolean("isHeatingTemperatureModeStarted", false)) {
                         if (!(isOverCurrentProtectionEnabled && heatingElements == maxHeatingElements && maxHeatingElements > 1 && (sharedPreferences.getBoolean("isBoilerStarted", false) || sharedPreferences.getBoolean("isBoilerTimerStarted", false) || sharedPreferences.getBoolean("isBoilerTimeModeStarted", false)))) {
-                            isHeatingStarted = true
-                            editPreferences.putBoolean("isHeatingStarted", true).apply()
-
                             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingElements").setValue(heatingElements)
                             Handler(Looper.getMainLooper()).postDelayed({
                                 realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingStarted").setValue(true)
                             }, 250)
 
-                            buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
-                            buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                            textResponse.visibility = View.VISIBLE
+                            textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                            textResponse.text = getString(R.string.waiting_for_response_text)
 
-                            var isAnimationStarted = true
-                            buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
-                            buttonStartHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
-                                .setListener(object: Animator.AnimatorListener {
-                                    override fun onAnimationStart(animation: Animator) {}
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                if (!response) {
+                                    textResponse.text = getString(R.string.response_not_received_text)
 
-                                    override fun onAnimationEnd(animation: Animator) {
-                                        if (isAnimationStarted) {
-                                            isAnimationStarted = false
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingStarted").setValue(false)
+                                }
+                            }, 5000)
 
-                                            buttonStartTimer.visibility = View.GONE
-                                            buttonStartHeating.visibility = View.GONE
-                                            buttonStopHeating.visibility = View.VISIBLE
+                            responseValueEventListener = object: ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.getValue(Boolean::class.java) != null) {
+                                        response = snapshot.getValue(Boolean::class.java)!!
+                                        if (response) {
+                                            binding.textResponse.text = getString(R.string.response_received_text)
+                                            Handler(Looper.getMainLooper()).postDelayed({
+                                                textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                            }, 3000)
+                                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                                .removeEventListener(responseValueEventListener)
 
-                                            buttonStopHeating.translationX = 1100f
-                                            buttonStopHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                            isHeatingStarted = true
+                                            editPreferences.putBoolean("isHeatingStarted", true).apply()
+
+                                            buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
+                                            buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+
+                                            var isAnimationStarted = true
+                                            buttonStartTimer.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
+                                            buttonStartHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(100)
+                                                .setListener(object: Animator.AnimatorListener {
+                                                    override fun onAnimationStart(animation: Animator) {}
+
+                                                    override fun onAnimationEnd(animation: Animator) {
+                                                        if (isAnimationStarted) {
+                                                            isAnimationStarted = false
+
+                                                            buttonStartTimer.visibility = View.GONE
+                                                            buttonStartHeating.visibility = View.GONE
+                                                            buttonStopHeating.visibility = View.VISIBLE
+
+                                                            buttonStopHeating.translationX = 1100f
+                                                            buttonStopHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                        }
+                                                    }
+
+                                                    override fun onAnimationCancel(animation: Animator) {}
+                                                    override fun onAnimationRepeat(animation: Animator) {}
+
+                                                }).start()
                                         }
                                     }
+                                }
 
-                                    override fun onAnimationCancel(animation: Animator) {}
-                                    override fun onAnimationRepeat(animation: Animator) {}
+                                override fun onCancelled(error: DatabaseError) {}
 
-                                }).start()
+                            }
+
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .addValueEventListener(responseValueEventListener)
                         } else {
                             if (sharedPreferences.getBoolean("isBoilerStarted", false)) {
                                 showOverCurrentProtectionAlertDialog("Так как сейчас запущен бойлер, для избежания перегрузки электросети по току, вы не можете запустить котёл. Вы можете отключить эту функцию в настройках.")
@@ -436,49 +552,86 @@ class HeatingTimerFragment : Fragment() {
             buttonStopHeating.setOnClickListener {
                 vibrate()
                 if (isNetworkConnected(requireActivity())) {
-                    isHeatingStarted = false
-                    editPreferences.putBoolean("isHeatingStarted", false).apply()
-
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingStarted").setValue(false)
 
-                    buttonIncrease.setImageResource(R.drawable.ic_increase)
-                    buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                    if (heatingElements == maxHeatingElements) {
-                        buttonDecrease.setImageResource(R.drawable.ic_decrease)
-                        buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
-                    } else if (heatingElements == 1) {
-                        buttonIncrease.setImageResource(R.drawable.ic_increase)
-                        buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
-                    }
+                    textResponse.visibility = View.VISIBLE
+                    textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                    textResponse.text = getString(R.string.waiting_for_response_text)
 
-                    var isAnimationStarted = true
-                    buttonStopHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0)
-                        .setListener(object: Animator.AnimatorListener {
-                            override fun onAnimationStart(animation: Animator) {}
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!response) {
+                            textResponse.text = getString(R.string.response_not_received_text)
 
-                            override fun onAnimationEnd(animation: Animator) {
-                                if (isAnimationStarted) {
-                                    isAnimationStarted = false
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                .removeEventListener(responseValueEventListener)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingStarted").setValue(true)
+                        }
+                    }, 5000)
 
-                                    buttonStopHeating.visibility = View.GONE
-                                    buttonStartTimer.visibility = View.VISIBLE
-                                    buttonStartHeating.visibility = View.VISIBLE
+                    responseValueEventListener = object: ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.getValue(Boolean::class.java) != null) {
+                                response = snapshot.getValue(Boolean::class.java)!!
+                                if (response) {
+                                    binding.textResponse.text = getString(R.string.response_received_text)
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500).start()
+                                    }, 3000)
+                                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                                        .removeEventListener(responseValueEventListener)
 
-                                    buttonStartTimer.translationX = 1100f
-                                    buttonStartHeating.translationX = 1100f
+                                    isHeatingStarted = false
+                                    editPreferences.putBoolean("isHeatingStarted", false).apply()
 
-                                    buttonStartTimer.alpha = 0f
-                                    buttonStartHeating.alpha = 0f
+                                    buttonIncrease.setImageResource(R.drawable.ic_increase)
+                                    buttonDecrease.setImageResource(R.drawable.ic_decrease)
+                                    if (heatingElements == maxHeatingElements) {
+                                        buttonDecrease.setImageResource(R.drawable.ic_decrease)
+                                        buttonIncrease.setImageResource(R.drawable.ic_increase_disabled)
+                                    } else if (heatingElements == 1) {
+                                        buttonIncrease.setImageResource(R.drawable.ic_increase)
+                                        buttonDecrease.setImageResource(R.drawable.ic_decrease_disabled)
+                                    }
 
-                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
-                                    buttonStartHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                    var isAnimationStarted = true
+                                    buttonStopHeating.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0)
+                                        .setListener(object: Animator.AnimatorListener {
+                                            override fun onAnimationStart(animation: Animator) {}
+
+                                            override fun onAnimationEnd(animation: Animator) {
+                                                if (isAnimationStarted) {
+                                                    isAnimationStarted = false
+
+                                                    buttonStopHeating.visibility = View.GONE
+                                                    buttonStartTimer.visibility = View.VISIBLE
+                                                    buttonStartHeating.visibility = View.VISIBLE
+
+                                                    buttonStartTimer.translationX = 1100f
+                                                    buttonStartHeating.translationX = 1100f
+
+                                                    buttonStartTimer.alpha = 0f
+                                                    buttonStartHeating.alpha = 0f
+
+                                                    buttonStartTimer.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(0).start()
+                                                    buttonStartHeating.animate().alpha(1f).translationX(0f).setDuration(500).setStartDelay(100).start()
+                                                }
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator) {}
+                                            override fun onAnimationRepeat(animation: Animator) {}
+
+                                        }).start()
                                 }
                             }
+                        }
 
-                            override fun onAnimationCancel(animation: Animator) {}
-                            override fun onAnimationRepeat(animation: Animator) {}
+                        override fun onCancelled(error: DatabaseError) {}
 
-                        }).start()
+                    }
+
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response").setValue(false)
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("response")
+                        .addValueEventListener(responseValueEventListener)
                 } else {
                     Toast.makeText(requireActivity(), "Нет подключения\nк Интернету!", Toast.LENGTH_LONG).show()
                 }
@@ -579,8 +732,8 @@ class HeatingTimerFragment : Fragment() {
 
     @Suppress("DEPRECATION")
     private fun vibrate() {
-        if (MainActivity.vibrator.hasVibrator()) {
-            if (MainActivity.isHapticFeedbackEnabled == "1") {
+        if (vibrator.hasVibrator()) {
+            if (isHapticFeedbackEnabled == "1") {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     binding.buttonStartTimer.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                 } else {
@@ -588,9 +741,9 @@ class HeatingTimerFragment : Fragment() {
                 }
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    MainActivity.vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
+                    vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    MainActivity.vibrator.vibrate(20)
+                    vibrator.vibrate(20)
                 }
             }
         }

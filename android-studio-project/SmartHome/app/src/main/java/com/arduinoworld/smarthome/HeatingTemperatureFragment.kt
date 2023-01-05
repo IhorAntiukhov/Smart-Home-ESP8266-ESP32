@@ -23,10 +23,12 @@ import com.google.firebase.database.ValueEventListener
 
 class HeatingTemperatureFragment : Fragment() {
     private lateinit var binding: FragmentHeatingTemperatureBinding
+    private lateinit var responseValueEventListener: ValueEventListener
     private var isTemperatureModeStarted = false
     private var decreaseInMinTemperature = 2
     private var increaseInMaxTemperature = 1
     private var heatingElements = 1
+    private var response = '0'
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -117,7 +119,9 @@ class HeatingTemperatureFragment : Fragment() {
                 .addListenerForSingleValueEvent(object: ValueEventListener {
                     @SuppressLint("SetTextI18n")
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val temperatureMode = snapshot.getValue(String::class.java)!!
+                        var temperatureMode = snapshot.getValue(String::class.java)!!
+                        response = temperatureMode.last()
+                        temperatureMode = temperatureMode.substring(0, temperatureMode.length - 2)
 
                         @Suppress("KotlinConstantConditions")
                         if (temperatureMode != " ") {
@@ -172,11 +176,41 @@ class HeatingTemperatureFragment : Fragment() {
                             inputLayoutTemperature.alpha = 1f
                             buttonStartTemperatureMode.alpha = 1f
                         }
+
+                        if (sharedPreferences.getBoolean("TemperatureModeResponse", false) && response == '1') {
+                            textResponse.visibility = View.VISIBLE
+                            textResponse.alpha = 1f
+                            textResponse.text = getString(R.string.response_received_text)
+                            editPreferences.putBoolean("TemperatureModeResponse", false).apply()
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                hideResponseText()
+                            }, 3000)
+                        }
                     }
 
                     override fun onCancelled(error: DatabaseError) {}
 
                 })
+
+            responseValueEventListener = object: ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.getValue(String::class.java) != null) {
+                        response = snapshot.getValue(String::class.java)!!.last()
+                        if (response == '1') {
+                            textResponse.text = getString(R.string.response_received_text)
+                            editPreferences.putBoolean("TemperatureModeResponse", false).apply()
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                hideResponseText()
+                            }, 3000)
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode")
+                                .removeEventListener(responseValueEventListener)
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+
+            }
 
             buttonStartTemperatureMode.setOnClickListener {
                 vibrate()
@@ -185,7 +219,7 @@ class HeatingTemperatureFragment : Fragment() {
                         if (!(isOverCurrentProtectionEnabled && heatingElements == maxHeatingElements && maxHeatingElements > 1 && (sharedPreferences.getBoolean("isBoilerStarted", false) || sharedPreferences.getBoolean("isBoilerTimerStarted", false) || sharedPreferences.getBoolean("isBoilerTimeModeStarted", false)))) {
                             if (inputTemperature.text!!.isNotEmpty()) {
                                 hideKeyboard(requireActivity())
-                                if (sharedPreferences.getBoolean("isHeatingTemperatureModeStarted", false)) {
+                                if (sharedPreferences.getBoolean("isHeatingTimeModeStarted", false)) {
                                     val alertDialogBuilder = androidx.appcompat.app.AlertDialog.Builder(requireActivity())
                                     alertDialogBuilder.setTitle("Совмещение режимов")
                                     alertDialogBuilder.setMessage("Вы хотите совместить режимы по температуре и по времени?")
@@ -236,15 +270,27 @@ class HeatingTemperatureFragment : Fragment() {
                     editPreferences.remove("HeatingMaxTemperature").commit()
 
                     realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingStarted").removeEventListener(heatingStartedValueEventListener)
-                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").setValue(" ")
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").setValue(" 00")
+                    realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").addValueEventListener(responseValueEventListener)
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (sharedPreferences.getBoolean("isHeatingTimeModeStarted", false)) {
                             editPreferences.putBoolean("isHeatingTimeModeStarted", false).apply()
-                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingOnOffTime").setValue(" ")
+                            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("heatingOnOffTime").setValue(" 0")
                             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("timeHeatingElements").setValue(" ")
                         }
                     }, 250)
+
+                    textResponse.visibility = View.VISIBLE
+                    textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+                    textResponse.text = getString(R.string.waiting_for_response_text)
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (response == '0') {
+                            textResponse.text = getString(R.string.response_not_received_text)
+                            editPreferences.putBoolean("TemperatureModeResponse", true).apply()
+                        }
+                    }, 5000)
 
                     var isAnimationStarted = true
                     cardViewTemperatureRange.animate().alpha(0f).translationX(-1100f).setDuration(500).setStartDelay(0).start()
@@ -293,8 +339,20 @@ class HeatingTemperatureFragment : Fragment() {
             editPreferences.putInt("HeatingMinTemperature", inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature)
             editPreferences.putInt("HeatingMaxTemperature", inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature).apply()
 
-            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").setValue("${inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature} ${inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature} ${heatingElements}0")
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").setValue("${inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature} ${inputTemperature.text!!.toString().toInt() + increaseInMaxTemperature} ${heatingElements}00")
             realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").addValueEventListener(heatingStartedValueEventListener)
+            realtimeDatabase.child(firebaseAuth.currentUser!!.uid).child("HeatingAndBoiler").child("temperatureMode").addValueEventListener(responseValueEventListener)
+
+            textResponse.visibility = View.VISIBLE
+            textResponse.animate().alpha(1f).setStartDelay(0L).setDuration(500).start()
+            textResponse.text = getString(R.string.waiting_for_response_text)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (response == '0') {
+                    textResponse.text = getString(R.string.response_not_received_text)
+                    editPreferences.putBoolean("TemperatureModeResponse", true).apply()
+                }
+            }, 5000)
 
             textTemperatureRange.text = getString(R.string.min_max_temperature_text,
                 inputTemperature.text!!.toString().toInt() - decreaseInMinTemperature,
@@ -370,8 +428,8 @@ class HeatingTemperatureFragment : Fragment() {
 
     private val heatingStartedValueEventListener = object: ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            if (snapshot.getValue(Int::class.java) != null) {
-                if (snapshot.getValue(String::class.java)!!.last() == '1') {
+            if (snapshot.getValue(String::class.java) != null) {
+                if (snapshot.getValue(String::class.java)!![snapshot.getValue(String::class.java)!!.length - 2] == '1') {
                     binding.textHeatingStarted.text = getString(R.string.heating_started_text)
                 } else {
                     binding.textHeatingStarted.text = getString(R.string.heating_stopped_text)
@@ -381,6 +439,25 @@ class HeatingTemperatureFragment : Fragment() {
 
         override fun onCancelled(error: DatabaseError) {}
 
+    }
+
+    private fun hideResponseText() {
+        var isAnimationStarted = true
+        binding.textResponse.animate().alpha(0f).setStartDelay(0).setDuration(500)
+            .setListener(object: Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {}
+
+                override fun onAnimationEnd(animation: Animator) {
+                    if (isAnimationStarted) {
+                        isAnimationStarted = false
+                        binding.textResponse.visibility = View.GONE
+                    }
+                }
+
+                override fun onAnimationCancel(animation: Animator) {}
+                override fun onAnimationRepeat(animation: Animator) {}
+
+            }).start()
     }
 
     private fun showOverCurrentProtectionAlertDialog(alertDialogMessage: String) {
